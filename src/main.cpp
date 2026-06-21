@@ -1,6 +1,5 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include "colors.hpp"
 #include <glm/trigonometric.hpp>
 
 #include <iostream>
@@ -13,7 +12,6 @@ const GLuint WIDTH = 800, HEIGHT = 600;
 
 int main()
 {
-    // Init GLFW
     glfwInit();
 
     glfwSetErrorCallback(error_callback);

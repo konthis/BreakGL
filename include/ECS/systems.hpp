@@ -1,49 +1,24 @@
 #pragma once
-#include "entities.hpp"
-#include <set>
-#include <memory>
+#include "system_manager.hpp"
+#include "ECSorganizer.hpp"
+#include "components.hpp"
 
-/* System-> apply things on a set of entities */
+ECSOrganizer ecs_org;
 
-class System{
-    public:
-    std::set<Entity> mEntities;
-    Signature signature{};
-};
-
-
-class SystemManager{
+class PhysicsSystem: public System{
     private:
-    std::unordered_map<const char *, std::shared_ptr<System>> mSystems;
-    // system signatures to check valid system entities
-    std::unordered_map<const char*, Signature> mSignatures{};
     public:
+    void update(float dt){
+    for (auto const& entity : mEntities)
+    	{
+    		auto& rigidBody = ecs_org.getComponent<RigidBody>(entity);
+    		auto& position = ecs_org.getComponent<Position>(entity);
+    		auto const& gravity = ecs_org.getComponent<Gravity>(entity);
 
-    template<typename T>
-	std::shared_ptr<T> addSystem()
-	{
-		const char* typeName = typeid(T).name();
-		assert(mSystems.find(typeName) == mSystems.end() && "Adding system more than once.");
-		auto system = std::make_shared<T>();
-		mSystems.insert({typeName, system});
-		return system;
-	}
+    		position.pos+= rigidBody.velocity * dt;
 
-    template<typename T>
-	void setSystemSignature(const Signature &signature)
-	{
-		const char* typeName = typeid(T).name();
-		assert(mSystems.find(typeName) != mSystems.end() && "System used before registered.");
-		mSignatures.insert({typeName, signature});
-	}
-
-    void entityDestroyed(Entity entity)
-	{
-        // remove entity from all systems
-		for (auto const& pair : mSystems)
-		{
-			auto const& system = pair.second;
-			system->mEntities.erase(entity);
-		}
-	}
+    		rigidBody.velocity += rigidBody.acceleration * gravity.g * dt;
+			rigidBody.acceleration += gravity.g * dt / rigidBody.mass;
+    	}
+    }
 };

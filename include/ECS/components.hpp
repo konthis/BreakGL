@@ -3,6 +3,7 @@
 #include <unordered_map>
 #include <memory>
 #define GLM_ENABLE_EXPERIMENTAL // enables the to_string
+#include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
 #include <glm/gtc/quaternion.hpp>
@@ -69,8 +70,6 @@ class ComponentManager{
     std::unordered_map<const char *,ComponentType> mComponentTypes{};
     std::unordered_map<const char *,std::shared_ptr<IComponentArray>> mComponentArrays{}; // shared pointer for downcasting, cant use unique_ptr
     ComponentType mNextComponentType{};
-    SignatureManager mSignatureManager; // just signature operations
-
     
     template<typename T> 
     std::shared_ptr<ComponentArray<T>> getComponentArray(){
@@ -79,6 +78,7 @@ class ComponentManager{
         // have to downcast
         return std::static_pointer_cast<ComponentArray<T>>(mComponentArrays[typeName]);
     }
+
     public:
 
     template<typename T>
@@ -126,25 +126,23 @@ class ComponentManager{
 // COMPONENTS
 
 struct Position{
-    glm::float32 x;
-    glm::float32 y;
-
+    glm::vec2 pos;
     void print(){
-        std::cout << "Position: (" << x << "," << y <<")\n";
+        std::cout << "Position:" << glm::to_string(pos) << "\n";
     }
 };
 
 struct RigidBody{
-    glm::float32 velocity;
-    glm::float32 acceleration;
+    glm::float32 mass = 5;
+    glm::vec2 velocity;
+    glm::vec2 acceleration;
     void print(){
-        std::cout << "Vel: " << velocity << "\nAcc: " << acceleration <<"\n";
+        std::cout << "Vel: " << glm::to_string(velocity) << "\nAcc: " << glm::to_string(acceleration) <<"\n";
     }
-
 };
 
 struct Gravity{
-    const static glm::float32 g = 9.8; 
+    float g = 9.8; 
 };
 
 struct Circle{

@@ -5,16 +5,24 @@
 int main(){
     EntityManager em;
     Entity e = em.createEntity();
-    em.printEntity(e);
     Signature s{};
-    s.set(0);s.set(10);
     em.setSignature(e,s);
-    em.printEntity(e);
 
     ComponentManager cm;
-    Translate t;
-    t.print();
-    cm.createComponentType<Translate>();
+    Position t = {5.,5.};
+    Circle c = {0.1, {1.,0.,0.,1.}};
+    cm.createComponentType<Position>();
+    cm.createComponentType<Circle>();
+    
+    cm.addComponent(e,t);
+    cm.addComponent(e,c);
+
+    
+    
+    em.printEntity(e);
+    s.set(cm.getComponentType<Position>());
+    s.set(cm.getComponentType<Circle>());
+    em.printEntity(e);
     
     return 0;
 }

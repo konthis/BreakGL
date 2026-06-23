@@ -1,15 +1,12 @@
 #pragma once
+#include "signatures.hpp" 
 #include <iostream>
 #include <cassert>
 #include <queue>
 #include <array>
-#include <bitset>
 
 using Entity                = uint32_t;
-using ComponentType         = uint8_t;
-using Signature             = std::bitset<MAX_COMPONENTS>;
 const Entity MAX_ENTITIES   = 5000;
-const ComponentType MAX_COMPONENTS = 32;
 
 class EntityManager{
     private:
@@ -23,7 +20,7 @@ class EntityManager{
         }
     }
 
-    Entity CreateEntity(){
+    Entity createEntity(){
         assert(mLivingEntitiesCount < MAX_ENTITIES && "Max Entities reached.");
         Entity entity = mAvailableEntities.front();
         mAvailableEntities.pop();
@@ -31,20 +28,24 @@ class EntityManager{
         return entity;
     }
 
-    void DestroyEntity(const Entity &entity){
+    void destroyEntity(const Entity &entity){
         assert(entity < MAX_ENTITIES && "Entity out of range.");
         mSignatures[entity].reset();
         mAvailableEntities.push(entity);
         mLivingEntitiesCount--;
     }
 
-    void SetSignature(const Entity &entity, const Signature &signature){
+    void setSignature(const Entity &entity, const Signature &signature){
         assert(entity < MAX_ENTITIES && "Entity out of range.");
         mSignatures[entity] = signature;
     }
-    Signature &GetSignature(const Entity &entity){
+
+    Signature &getSignature(const Entity &entity){
         assert(entity < MAX_ENTITIES && "Entity out of range.");
         return mSignatures[entity]; 
     }
 
+    void printEntity(const Entity &entity){
+        std::cout << "Entity " << entity << "\nSignature " << getSignature(entity) << "\n";
+    }
 };

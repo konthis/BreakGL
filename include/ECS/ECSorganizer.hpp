@@ -23,6 +23,10 @@ class ECSOrganizer{
         return mEntityManager->createEntity();
     }
 
+    Signature getSignature(const Entity &entity){
+        return mEntityManager->getSignature(entity);
+    }
+
     void destroyEntity(const Entity &entity){
         mEntityManager->destroyEntity(entity);
         mComponentManager->entityDestroyed(entity);

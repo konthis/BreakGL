@@ -30,6 +30,7 @@ class SystemManager{
 		return system;
 	}
 
+
     template<typename T>
 	void setSystemSignature(const Signature &signature)
 	{

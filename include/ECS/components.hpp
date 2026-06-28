@@ -127,7 +127,7 @@ class ComponentManager{
 // COMPONENTS
 
 struct Gravity{
-    float g = 9.8; 
+    float g; 
 };
 
 struct Ball{
@@ -135,9 +135,13 @@ struct Ball{
     glm::vec4 color;
 };
 
-struct Transform {
+struct Square{
+    GLfloat side;
+    glm::vec4 color;
+};
+
+struct Position{
     glm::vec2 position;
-    glm::vec2 size;
 };
 
 struct Velocity {

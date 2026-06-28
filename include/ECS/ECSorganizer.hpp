@@ -13,7 +13,7 @@ class ECSOrganizer{
 	std::unique_ptr<SystemManager> mSystemManager;
 
     public:
-    ECSOrganizer(){
+    void init(){
 	    mEntityManager      = std::make_unique<EntityManager>();
         mComponentManager   = std::make_unique<ComponentManager>();
 	    mSystemManager      = std::make_unique<SystemManager>();

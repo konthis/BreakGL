@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.15.0)
 
-project(PongGL)
+project(BreakGL)
 
 add_executable(${PROJECT_NAME} 
                         src/main.cpp

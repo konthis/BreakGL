@@ -1,5 +1,6 @@
 #pragma once
 #include "entities.hpp"
+#include "shader.hpp"
 #include <unordered_map>
 #include <memory>
 #define GLM_ENABLE_EXPERIMENTAL // enables the to_string
@@ -125,32 +126,35 @@ class ComponentManager{
 
 // COMPONENTS
 
-struct Position{
-    glm::vec2 pos;
-    void print(){
-        std::cout << "Position:" << glm::to_string(pos) << "\n";
-    }
-};
-
-struct RigidBody{
-    glm::float32 mass = 5;
-    glm::vec2 velocity;
-    glm::vec2 acceleration;
-    void print(){
-        std::cout << "Vel: " << glm::to_string(velocity) << "\nAcc: " << glm::to_string(acceleration) <<"\n";
-    }
-};
-
 struct Gravity{
     float g = 9.8; 
 };
 
-struct Circle{
+struct Ball{
     glm::float32 radius;
     glm::vec4 color;
-    void print(){
-        std::cout << "Circle\n"
-                  << "Radius: " << radius <<"\n"
-                  << "Color: " << glm::to_string(color) <<"\n";
-    }
+};
+
+struct Transform {
+    glm::vec2 position;
+    glm::vec2 size;
+};
+
+struct Velocity {
+    glm::vec2 value;
+};
+
+struct Renderable {
+    Shader* shader;
+    GLuint VAO{};
+    GLuint VBO{};
+    GLuint EBO{};
+};
+
+struct PlayerInput {
+    GLuint leftKey;
+    GLuint rightKey;
+    GLuint upKey;
+    GLuint downKey;
+    GLuint escKey;
 };

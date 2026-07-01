@@ -12,9 +12,19 @@ static std::string readFile(const char* path)
     return ss.str();
 }
 
+GLint Shader::setUniformLocation(const std::string& name){
+    if (mUniformCache.find(name) == mUniformCache.end())
+        mUniformCache[name] = glGetUniformLocation(mID, name.c_str());
+}
+
+GLint Shader::getUniformLocation(const std::string& name) {
+    return mUniformCache[name];
+}
+
 
 Shader::Shader(const char* vertPath, const char* fragPath)
 {
+
     std::string vertSrc = readFile(vertPath);
     std::string fragSrc = readFile(fragPath);
     const char* vCode = vertSrc.c_str();
@@ -53,6 +63,13 @@ Shader::Shader(const char* vertPath, const char* fragPath)
         glGetProgramInfoLog(mID, 512, nullptr, log);
         std::cerr << "Shader link error:\n" << log << "\n";
     }
+
+    // UNIFORM INITIALIZATIONS
+    setUniformLocation("uModel");
+    setUniformLocation("uProjection");
+    setUniformLocation("uColor");
+    setUniformLocation("uTime");
+    //
 
     glDeleteShader(vert);
     glDeleteShader(frag);

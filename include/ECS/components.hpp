@@ -10,6 +10,8 @@
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/string_cast.hpp>
 
+
+
 /*
 ECS-COMPONENT MEMORY ARCHITECTURE: arrays of components
 ex: component1 array = [comp1 of ent1, comp1 of ent2 ,....] on cont. mem
@@ -132,12 +134,10 @@ struct Gravity{
 
 struct Ball{
     glm::float32 radius;
-    glm::vec4 color;
 };
 
 struct Square{
     GLfloat side;
-    glm::vec4 color;
 };
 
 struct Position{
@@ -153,12 +153,15 @@ struct Renderable {
     GLuint VAO{};
     GLuint VBO{};
     GLuint EBO{};
+    glm::vec4 color;
+    glm::mat4 modelMatrix{1.0f};
+
 };
 
 struct PlayerInput {
-    GLuint leftKey;
-    GLuint rightKey;
-    GLuint upKey;
-    GLuint downKey;
-    GLuint escKey;
+    GLuint leftKey = GLFW_KEY_LEFT;
+    GLuint rightKey = GLFW_KEY_RIGHT;
+    GLuint upKey = GLFW_KEY_UP;
+    GLuint downKey = GLFW_KEY_DOWN;
+    GLuint escKey = GLFW_KEY_ESCAPE;
 };

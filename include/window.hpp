@@ -9,10 +9,11 @@ void processInput(GLFWwindow *window);
 class Window{
     private:
     GLFWwindow* mWindow;
-    void processWindowInput();
 
     public:
     int init(GLuint width, GLuint height, const char* title);
+
+    GLuint processKeyPress();
 
     bool shouldClose();
 

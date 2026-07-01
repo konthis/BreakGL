@@ -6,10 +6,26 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
     glViewport(0, 0, width, height);
 }
 
-void Window::processWindowInput()
+GLuint Window::processKeyPress()
 {
-    if (glfwGetKey(mWindow, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+    // ONLY HANDLES PRESSES FOR NOW
+    if (glfwGetKey(mWindow, GLFW_KEY_ESCAPE) == GLFW_PRESS){
         glfwSetWindowShouldClose(mWindow, true);
+        return GLFW_KEY_ESCAPE;
+    }
+    if (glfwGetKey(mWindow, GLFW_KEY_UP) == GLFW_PRESS){
+        return GLFW_KEY_UP;
+    }
+    if (glfwGetKey(mWindow, GLFW_KEY_DOWN) == GLFW_PRESS){
+        return GLFW_KEY_DOWN;
+    }
+    if (glfwGetKey(mWindow, GLFW_KEY_LEFT) == GLFW_PRESS){
+        return GLFW_KEY_LEFT;
+
+    }
+    if (glfwGetKey(mWindow, GLFW_KEY_RIGHT) == GLFW_PRESS){
+        return GLFW_KEY_RIGHT;
+    }
 }
 
 int Window::init(GLuint width, GLuint height, const char* title){
@@ -47,7 +63,7 @@ void Window::swapBuffers(){
 
 void Window::pollEvents(){
     glfwPollEvents();
-    processWindowInput();
+    // processKeyPress();
 }
 
 

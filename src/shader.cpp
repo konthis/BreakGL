@@ -15,6 +15,7 @@ static std::string readFile(const char* path)
 GLint Shader::setUniformLocation(const std::string& name){
     if (mUniformCache.find(name) == mUniformCache.end())
         mUniformCache[name] = glGetUniformLocation(mID, name.c_str());
+    return -1;
 }
 
 GLint Shader::getUniformLocation(const std::string& name) {
@@ -68,6 +69,7 @@ Shader::Shader(const char* vertPath, const char* fragPath)
     setUniformLocation("uModel");
     setUniformLocation("uProjection");
     setUniformLocation("uColor");
+    setUniformLocation("uRadius");
     setUniformLocation("uTime");
     //
 

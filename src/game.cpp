@@ -10,8 +10,11 @@ ECSOrganizer ecs_org;
 
 void Game::run(){ 
     mWindow.init(width, height, "BreakGL");
-    Shader squareShader(SHADER_DIR "/square/square.vert",
-                        SHADER_DIR "/square/square.frag");
+    Shader simpleShader(SHADER_DIR "/simple/simple.vert",
+                        SHADER_DIR "/simple/simple.frag");
+
+    Shader ballShader(SHADER_DIR "/ball/ball.vert",
+                        SHADER_DIR "/ball/ball.frag");
     ecs_org.init();
 
     ecs_org.createComponent<Square>();
@@ -69,26 +72,28 @@ void Game::run(){
     }
     renderSystem->init(width,height);
 
-    std::vector<Entity> entities(1);
-    for (auto& entity : entities){
-        entity = ecs_org.createEntity();
-        // ecs_org.addComponent<Square>(entity,Square{
-        //     .side = 50.0f,
-        // });
-        ecs_org.addComponent<Ball>(entity,Ball{
-            .radius = 5.0f,
-        });
-        ecs_org.addComponent<Position>(entity, Position{
-            .position = glm::vec2{width/2.0f,height/2.0f},
-        });
-        ecs_org.addComponent<Renderable>(entity, Renderable{&squareShader,
-            .color = glm::vec4{1.0f,1.0f,0.0f,1.0f},}
-        );
+    // std::vector<Entity> entities(1);
+    // for (auto& entity : entities){
+    //     entity = ecs_org.createEntity();
+    //     // ecs_org.addComponent<Square>(entity,Square{
+    //     //     .side = 50.0f,
+    //     // });
+    //     ecs_org.addComponent<Ball>(entity,Ball{
+    //         .radius = 5.0f,
+    //     });
+    //     ecs_org.addComponent<Position>(entity, Position{
+    //         .position = glm::vec2{width/2.0f,height/2.0f},
+    //     });
+    //     ecs_org.addComponent<Renderable>(entity, Renderable{&squareShader,
+    //         .color = glm::vec4{1.0f,1.0f,0.0f,1.0f},}
+    //     );
 
-        ecs_org.addComponent<Gravity>(entity, Gravity{.value = 300.0f});
-        ecs_org.addComponent<RigidBody>(entity, RigidBody{.velocity= glm::vec2{0.0f,0.0f}, .acceleration = glm::vec2{0.0f,0.0f}});
-        ecs_org.addComponent<PlayerInput>(entity,PlayerInput{});
-    }
+    //     ecs_org.addComponent<Gravity>(entity, Gravity{.value = 300.0f});
+    //     ecs_org.addComponent<RigidBody>(entity, RigidBody{.velocity= glm::vec2{0.0f,0.0f}, .acceleration = glm::vec2{0.0f,0.0f}});
+    //     ecs_org.addComponent<PlayerInput>(entity,PlayerInput{});
+    // }
+
+    loadScene1(ecs_org, &ballShader);
 
     physicsSystem->init();
     meshGenSystem->init();

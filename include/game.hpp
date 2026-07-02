@@ -2,6 +2,7 @@
 #include "window.hpp"
 #include "shader.hpp"
 #include "systems.hpp"
+#include "scenes.hpp"
 
 
 class Game{

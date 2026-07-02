@@ -13,6 +13,7 @@ add_executable(${PROJECT_NAME}
                         ../src/shader.cpp
                         ../src/game.cpp
                         ../src/window.cpp
+                        ../src/scenes.cpp
                         )
 
 

@@ -129,7 +129,7 @@ class ComponentManager{
 // COMPONENTS
 
 struct Gravity{
-    float g; 
+    float value; 
 };
 
 struct Ball{
@@ -144,8 +144,9 @@ struct Position{
     glm::vec2 position;
 };
 
-struct Velocity {
-    glm::vec2 value;
+struct RigidBody{
+    glm::vec2 velocity;
+    glm::vec2 acceleration;
 };
 
 struct Renderable {
@@ -155,6 +156,7 @@ struct Renderable {
     GLuint EBO{};
     glm::vec4 color;
     glm::mat4 modelMatrix{1.0f};
+    GLfloat indexCount{}; // how many edges to make the object (ex. square = 6, 2 triangles)
 
 };
 

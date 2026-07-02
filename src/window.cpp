@@ -21,11 +21,11 @@ GLuint Window::processKeyPress()
     }
     if (glfwGetKey(mWindow, GLFW_KEY_LEFT) == GLFW_PRESS){
         return GLFW_KEY_LEFT;
-
     }
     if (glfwGetKey(mWindow, GLFW_KEY_RIGHT) == GLFW_PRESS){
         return GLFW_KEY_RIGHT;
     }
+    return GLFW_KEY_UNKNOWN;
 }
 
 int Window::init(GLuint width, GLuint height, const char* title){
@@ -33,6 +33,8 @@ int Window::init(GLuint width, GLuint height, const char* title){
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+
 
     mWindow = glfwCreateWindow(width, height, title, NULL, NULL);
     if (mWindow == NULL)
@@ -43,7 +45,8 @@ int Window::init(GLuint width, GLuint height, const char* title){
     }
 
     glfwMakeContextCurrent(mWindow);
-    glfwSetFramebufferSizeCallback(mWindow, framebuffer_size_callback);
+    // NO RESIZING (YET)
+    // glfwSetFramebufferSizeCallback(mWindow, framebuffer_size_callback);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {

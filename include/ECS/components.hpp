@@ -140,6 +140,11 @@ struct Square{
     GLfloat side;
 };
 
+struct Platform{
+    GLfloat smallSide;
+    GLfloat bigSide;
+};
+
 struct Position{
     glm::vec2 position;
 };
@@ -148,6 +153,8 @@ struct RigidBody{
     glm::vec2 velocity;
     glm::vec2 acceleration;
 };
+
+struct Collider{}; //shell component just for checks
 
 struct Renderable {
     Shader* shader;

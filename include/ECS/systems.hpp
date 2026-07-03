@@ -57,6 +57,7 @@ class MeshGenSystem: public System{
                 };
                 indices = {0, 1, 2, 0, 2, 3};
             }
+
             else if(sig.test(ecs_org.getComponentType<Ball>())){
                 // make it like a fan, think about it like this
                 Ball ball = ecs_org.getComponent<Ball>(entity);
@@ -75,6 +76,18 @@ class MeshGenSystem: public System{
                     indices.push_back(i);
                     indices.push_back(i + 1);
                 }
+            }
+
+            else if(sig.test(ecs_org.getComponentType<Platform>())){
+                Platform pl = ecs_org.getComponent<Platform>(entity);
+                vertices = {
+                    glm::vec3{-pl.bigSide/2.,pl.smallSide/2.,0.},
+                    glm::vec3{pl.bigSide/2.,pl.smallSide/2.,0.},
+                    glm::vec3{pl.bigSide/2.,-pl.smallSide/2.,0.},
+                    glm::vec3{-pl.bigSide/2.,-pl.smallSide/2.,0.},
+                };
+
+                indices = {0, 1, 2, 0, 2, 3};
             }
 
             glGenVertexArrays(1,&VAO);
@@ -121,14 +134,16 @@ class RenderSystem: public System{
                 auto& pos = ecs_org.getComponent<Position>(entity);
                 rend.modelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(pos.position, 0.0f));
 
-                Signature sig = ecs_org.getSignature(entity);
-                if (sig.test(ecs_org.getComponentType<Ball>()))
-                    radius = ecs_org.getComponent<Ball>(entity).radius;
-
-
                 rend.shader->activate();
+
+                Signature sig = ecs_org.getSignature(entity);
+                if (sig.test(ecs_org.getComponentType<Ball>())){
+                    radius = ecs_org.getComponent<Ball>(entity).radius;
+                    rend.shader->setUniform<float>("uRadius",radius);
+                }
+
                 rend.shader->setUniform<glm::mat4>("uModel",rend.modelMatrix);
-                rend.shader->setUniform<float>("uRadius",radius);
+
                 rend.shader->setUniform<glm::mat4>("uProjection",mProjection);
                 rend.shader->setUniform<glm::vec4>("uColor",rend.color);
                 rend.shader->setUniform<float>("uTime",(float)glfwGetTime());
@@ -202,6 +217,51 @@ class CollisionSystem: public System{
                 }
                 
             }
+
+            // platform x ball collision
+            else if((sig1.test(ecs_org.getComponentType<Platform>()) &&
+                sig2.test(ecs_org.getComponentType<Ball>()))|| 
+                
+                (sig2.test(ecs_org.getComponentType<Platform>()) &&
+                sig1.test(ecs_org.getComponentType<Ball>()))){
+                
+                Entity plE,ballE;
+                if(sig1.test(ecs_org.getComponentType<Platform>())){
+                    plE = e1;
+                    ballE = e2;
+                }
+                else{
+                    plE = e2;
+                    ballE = e1;
+                }
+
+                Platform pl = ecs_org.getComponent<Platform>(plE);
+                Position plPosition = ecs_org.getComponent<Position>(plE);
+                float rad = ecs_org.getComponent<Ball>(ballE).radius;
+                auto &ballPosition = ecs_org.getComponent<Position>(ballE);
+                auto &ballRB = ecs_org.getComponent<RigidBody>(ballE);
+
+                glm::vec2 halfExt = { pl.bigSide/2.f, pl.smallSide/2.f };
+                delta = ballPosition.position - plPosition.position; 
+                // to find the contact point
+                glm::vec2 closest = glm::clamp(delta, -halfExt, halfExt);
+
+                glm::vec2 contactPoint = plPosition.position + closest;
+                glm::vec2 diff = ballPosition.position - contactPoint;
+                distance = glm::length(diff); 
+
+                if (distance < rad) {
+                    glm::vec2 normal = glm::normalize(diff);
+                    // push ball out
+                    ballPosition.position += normal * (rad - distance);
+                    float dvn = glm::dot(ballRB.velocity, normal);
+                    if (dvn < 0.f)
+                        ballRB.velocity -= 2.f * dvn * normal;
+                }
+                
+
+            }
+
         }
 
     public:
@@ -232,6 +292,19 @@ class CollisionSystem: public System{
                     radius_seconds, mWorldDims[1] - radius_seconds,radius_seconds, mWorldDims[3] - radius_seconds
                 };
             }
+
+            else if(sig.test(ecs_org.getComponentType<Platform>())){
+                auto &plat = ecs_org.getComponent<Platform>(*it);
+                float smallSide_seconds = plat.smallSide/2.;
+                float bigSide_seconds = plat.bigSide/2.;
+                edgeCasesForShape = {
+                    bigSide_seconds, mWorldDims[1] - bigSide_seconds, smallSide_seconds, mWorldDims[3] -smallSide_seconds 
+                };
+
+            }
+
+
+
             checkWallCollisions(pos,rb,edgeCasesForShape);
 
             for (auto jt = std::next(it); jt != mEntities.end(); ++jt) {
@@ -247,11 +320,11 @@ class InputSystem: public System{
     void init(){}
     void update(Window &window) {
         for (auto const& entity : mEntities) {
-            auto& gravity = ecs_org.getComponent<Gravity>(entity);
             auto& pos = ecs_org.getComponent<Position>(entity);
             auto& input = ecs_org.getComponent<PlayerInput>(entity);
 
             if(window.processKeyPress() == input.upKey){
+                // std::cout << glm::to_string(pos.position)<<"\n";
                 pos.position.y += 1.0f;
             }
             if(window.processKeyPress() == input.downKey){

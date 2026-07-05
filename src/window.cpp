@@ -6,12 +6,12 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
     glViewport(0, 0, width, height);
 }
 
-GLuint Window::processKeyPress()
+GLuint Window::processKeyPress(GameState &gstate)
 {
     // ONLY HANDLES PRESSES FOR NOW
-    if (glfwGetKey(mWindow, GLFW_KEY_ESCAPE) == GLFW_PRESS){
+    if (glfwGetKey(mWindow, GLFW_KEY_X) == GLFW_PRESS){
         glfwSetWindowShouldClose(mWindow, true);
-        return GLFW_KEY_ESCAPE;
+        return GLFW_KEY_X;
     }
     if (glfwGetKey(mWindow, GLFW_KEY_UP) == GLFW_PRESS){
         return GLFW_KEY_UP;
@@ -24,6 +24,10 @@ GLuint Window::processKeyPress()
     }
     if (glfwGetKey(mWindow, GLFW_KEY_RIGHT) == GLFW_PRESS){
         return GLFW_KEY_RIGHT;
+    }
+    if (glfwGetKey(mWindow, GLFW_KEY_ESCAPE) == GLFW_PRESS){
+        gstate = GameState::Menu;
+        return GLFW_KEY_ESCAPE;
     }
     return GLFW_KEY_UNKNOWN;
 }

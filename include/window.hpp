@@ -2,6 +2,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
+#include "game_state.hpp"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow *window);
@@ -13,7 +14,7 @@ class Window{
     public:
     int init(GLuint width, GLuint height, const char* title);
 
-    GLuint processKeyPress();
+    GLuint processKeyPress(GameState &gstate);
 
     bool shouldClose();
 

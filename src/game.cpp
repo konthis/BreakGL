@@ -1,8 +1,9 @@
 #include "game.hpp"
 
-GLuint width    = 800;
-GLuint height   = 600; 
-const float DT  = 1/120.f;
+GLuint width        = 800;
+GLuint height       = 600; 
+GLuint HUDheight    = 50;
+const float DT      = 1/120.f;
 
 ECSOrganizer ecs_org;
 
@@ -24,7 +25,7 @@ void Game::run(){
     ecs_org.createComponent<Platform>();
     ecs_org.createComponent<Ball>();
     ecs_org.createComponent<Position>();
-    ecs_org.createComponent<Gravity>();
+    // ecs_org.createComponent<Gravity>();
     ecs_org.createComponent<RigidBody>();
     ecs_org.createComponent<Collider>();
     ecs_org.createComponent<Renderable>();
@@ -42,7 +43,7 @@ void Game::run(){
     {
         Signature sig;
         sig.set(ecs_org.getComponentType<Position>());
-        sig.set(ecs_org.getComponentType<Gravity>());
+        // sig.set(ecs_org.getComponentType<Gravity>());
         sig.set(ecs_org.getComponentType<RigidBody>());
         ecs_org.setSystemSignature<PhysicsSystem>(sig);
     }
@@ -52,6 +53,7 @@ void Game::run(){
     {
         Signature sig;
         sig.set(ecs_org.getComponentType<Position>());
+        sig.set(ecs_org.getComponentType<RigidBody>());
         sig.set(ecs_org.getComponentType<PlayerInput>());
         ecs_org.setSystemSignature<InputSystem>(sig);
     }
@@ -78,13 +80,15 @@ void Game::run(){
     renderSystem->init(width,height);
 
     // loadSceneBalls(ecs_org, &ballShader);
-    loadSceneBallsAndPlatform(ecs_org, &ballShader, &platformShader, glm::vec2{width,height});
+    // loadSceneBallsAndPlatform(ecs_org, &ballShader, &platformShader, glm::vec2{width,height});
+    loadSceneBallPlatformSquares(ecs_org, &ballShader,&platformShader, &simpleShader, glm::vec2{width,height}, HUDheight);
     physicsSystem->init();
     meshGenSystem->init();
 
 
     float currTime = 0.f, lastTime = 0.f, dt=0.f;
     float timeAccumulator;
+    mState = GameState::Playing;
     while(!mWindow.shouldClose()){
         
         currTime = (float)glfwGetTime();
@@ -92,16 +96,33 @@ void Game::run(){
         lastTime = currTime;
 
         mWindow.pollEvents();
-        
-        inputSystem->update(mWindow);
+        GLuint keyPressed = mWindow.processKeyPress(mState);
+        switch(mState){
+            case GameState::Playing:
+                inputSystem->update(keyPressed);
 
-        while(timeAccumulator >= DT){
-            physicsSystem->update(DT);
-            timeAccumulator -= DT;
+                while(timeAccumulator >= DT){
+                    physicsSystem->update(DT);
+                    timeAccumulator -= DT;
+                }
+                collisionSystem->update(mState);
+                renderSystem->update();
+                break;
+            case GameState::Menu:
+                mState = GameState::Playing;
+                break;
+            case GameState::Paused:
+                mState = GameState::Playing;
+                break;
+            case GameState::GameOver:
+                mState = GameState::Playing;
+                break;
+            case GameState::Win:
+                mState = GameState::Playing;
+                break;
+
         }
-
-        collisionSystem->update();
-        renderSystem->update();
+        
 
         mWindow.swapBuffers();
     }

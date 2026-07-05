@@ -3,6 +3,7 @@
 #include "ECSorganizer.hpp"
 #include "components.hpp"
 #include "shader.hpp"
+#include "game_state.hpp"
 
 
 extern ECSOrganizer ecs_org;
@@ -12,12 +13,12 @@ class PhysicsSystem: public System{
     public:
     
         void init(){
-            for (auto const& entity : mEntities) {
-                Signature sig = ecs_org.getSignature(entity);
-                auto& grav = ecs_org.getComponent<Gravity>(entity);
-                auto& rb = ecs_org.getComponent<RigidBody>(entity);
-                rb.acceleration.y = -grav.value;
-            }
+            // for (auto const& entity : mEntities) {
+            //     Signature sig = ecs_org.getSignature(entity);
+            //     auto& grav = ecs_org.getComponent<Gravity>(entity);
+            //     auto& rb = ecs_org.getComponent<RigidBody>(entity);
+            //     rb.acceleration.y = -grav.value;
+            // }
         }
 
         void update(float dt){
@@ -159,8 +160,8 @@ class CollisionSystem: public System{
 
     private:
         glm::vec4 mWorldDims;
-        void checkWallCollisions(Position &pos, RigidBody &rb,glm::vec4 &edgeCasesForShape){
-            if (pos.position.y <= edgeCasesForShape[2]) {
+        void checkWallCollisions(Position &pos, RigidBody &rb,glm::vec4 &edgeCasesForShape, bool isPlatform){
+            if (pos.position.y <= edgeCasesForShape[2] && isPlatform) {
                 pos.position.y = edgeCasesForShape[2];
                 rb.velocity.y = glm::abs(rb.velocity.y);
             }
@@ -178,13 +179,14 @@ class CollisionSystem: public System{
             }
         }
 
-        void checkEntityCollisions(Entity e1, Entity e2){
+        void checkEntityCollisions(Entity e1, Entity e2, std::set<Entity>& toDestroy){
             auto& posE1 = ecs_org.getComponent<Position>(e1);
             auto &rbE1 = ecs_org.getComponent<RigidBody>(e1);
             auto& posE2 = ecs_org.getComponent<Position>(e2);
             auto &rbE2 = ecs_org.getComponent<RigidBody>(e2);
             Signature sig1 = ecs_org.getSignature(e1);
             Signature sig2 = ecs_org.getSignature(e2);
+
             glm::vec2 delta;
             float distance, minDistance;
             // ball x ball collision
@@ -212,31 +214,19 @@ class CollisionSystem: public System{
                         rbE1.velocity -= dvn * n;
                         rbE2.velocity += dvn * n;
                     }
-
-                    
                 }
-                
             }
 
             // platform x ball collision
-            else if((sig1.test(ecs_org.getComponentType<Platform>()) &&
-                sig2.test(ecs_org.getComponentType<Ball>()))|| 
+            else if( 
+                sig2.test(ecs_org.getComponentType<Platform>()) &&
+                sig1.test(ecs_org.getComponentType<Ball>())){
                 
-                (sig2.test(ecs_org.getComponentType<Platform>()) &&
-                sig1.test(ecs_org.getComponentType<Ball>()))){
-                
-                Entity plE,ballE;
-                if(sig1.test(ecs_org.getComponentType<Platform>())){
-                    plE = e1;
-                    ballE = e2;
-                }
-                else{
-                    plE = e2;
-                    ballE = e1;
-                }
+                Entity plE = e2, ballE=e1;
 
-                Platform pl = ecs_org.getComponent<Platform>(plE);
-                Position plPosition = ecs_org.getComponent<Position>(plE);
+                const auto& pl = ecs_org.getComponent<Platform>(plE);
+                const auto& plPosition = ecs_org.getComponent<Position>(plE);
+                auto &plRB = ecs_org.getComponent<RigidBody>(plE);
                 float rad = ecs_org.getComponent<Ball>(ballE).radius;
                 auto &ballPosition = ecs_org.getComponent<Position>(ballE);
                 auto &ballRB = ecs_org.getComponent<RigidBody>(ballE);
@@ -250,18 +240,65 @@ class CollisionSystem: public System{
                 glm::vec2 diff = ballPosition.position - contactPoint;
                 distance = glm::length(diff); 
 
-                if (distance < rad) {
+                // relative velocity, to correctly calculate, when platform is moving, slightly decreased for smooth gameplay
+                glm::vec2 relVel = ballRB.velocity - plRB.velocity/4.f;
+
+                if (distance < rad && distance > 0.f) {
                     glm::vec2 normal = glm::normalize(diff);
-                    // push ball out
                     ballPosition.position += normal * (rad - distance);
-                    float dvn = glm::dot(ballRB.velocity, normal);
-                    if (dvn < 0.f)
-                        ballRB.velocity -= 2.f * dvn * normal;
-                }
                 
+                    float dvn = glm::dot(relVel, normal);
+                    if (dvn < 0.f) {
+                        if (normal.y > 0.5f) {  // top of the platform
+                            // make the platform be different from walls on reflection
+                            // slightly left of the platform contact->ball goes slightly left too
+                            float offset = (ballPosition.position.x - plPosition.position.x) / (pl.bigSide / 2.f);
+                            float speed = glm::length(ballRB.velocity);
+                            ballRB.velocity.x = speed * glm::clamp(offset, -1.f, 1.f);
+                            ballRB.velocity.y = glm::abs(ballRB.velocity.y);
+                            ballRB.velocity = glm::normalize(ballRB.velocity) * speed;
+                        } else {  // sides pure reflection
+                            ballRB.velocity -= 2.f * dvn * normal;
+                        }
+                    }
+                }
+
 
             }
 
+            // ball x square collision
+            else if(
+                sig2.test(ecs_org.getComponentType<Square>()) &&
+                sig1.test(ecs_org.getComponentType<Ball>())){
+
+                Entity sqE = e2,ballE = e1;
+
+                const auto& sq = ecs_org.getComponent<Square>(sqE);
+                const auto& sqPosition = ecs_org.getComponent<Position>(sqE);
+                float rad = ecs_org.getComponent<Ball>(ballE).radius;
+                auto &ballPosition = ecs_org.getComponent<Position>(ballE);
+                auto &ballRB = ecs_org.getComponent<RigidBody>(ballE);
+                
+                glm::vec2 halfExt = { sq.side/2.f, sq.side/2.f};
+                delta = ballPosition.position - sqPosition.position; 
+                // to find the contact point
+                glm::vec2 closest = glm::clamp(delta, -halfExt, halfExt);
+
+                glm::vec2 contactPoint = sqPosition.position + closest;
+                glm::vec2 diff = ballPosition.position - contactPoint;
+                distance = glm::length(diff); 
+
+                if (distance < rad) {
+                    glm::vec2 normal = glm::normalize(diff);
+                    ballPosition.position += normal * (rad - distance);
+                
+                    float dvn = glm::dot(ballRB.velocity, normal);
+                    if (dvn < 0.f){
+                        ballRB.velocity -= 2.f * dvn * normal;
+                    }
+                    toDestroy.insert(sqE);
+                }
+            }
         }
 
     public:
@@ -271,44 +308,51 @@ class CollisionSystem: public System{
         mWorldDims = worldDims;
     }
 
-    void update(){
-        //using iterator to avoid O(n^2) entity collisions
-        for (auto it = mEntities.begin(); it != mEntities.end(); ++it) {
-            Signature sig = ecs_org.getSignature(*it);
-            auto &pos = ecs_org.getComponent<Position>(*it);
-            auto &rb = ecs_org.getComponent<RigidBody>(*it);
-            glm::vec4 edgeCasesForShape{};
-            if(sig.test(ecs_org.getComponentType<Square>())){
-                auto &sq = ecs_org.getComponent<Square>(*it);
-                float side_seconds = sq.side/2.;
-                edgeCasesForShape = {
-                    side_seconds, mWorldDims[1] - side_seconds,side_seconds, mWorldDims[3] - side_seconds
-                };
-            }
-            else if(sig.test(ecs_org.getComponentType<Ball>())){
-                auto &circle = ecs_org.getComponent<Ball>(*it);
-                float radius_seconds = circle.radius/2.;
-                edgeCasesForShape = {
-                    radius_seconds, mWorldDims[1] - radius_seconds,radius_seconds, mWorldDims[3] - radius_seconds
-                };
-            }
-
-            else if(sig.test(ecs_org.getComponentType<Platform>())){
-                auto &plat = ecs_org.getComponent<Platform>(*it);
+    void update(GameState &gstate){
+        for (auto const& entity : mEntities){
+            auto const& sig = ecs_org.getSignature(entity);
+            // PLATFORM COLLISION (ONLY WITH WALLS NOW)
+            if(sig.test(ecs_org.getComponentType<Platform>())){
+                auto &plat = ecs_org.getComponent<Platform>(entity);
+                auto &pos = ecs_org.getComponent<Position>(entity);
+                auto &rb = ecs_org.getComponent<RigidBody>(entity);
                 float smallSide_seconds = plat.smallSide/2.;
                 float bigSide_seconds = plat.bigSide/2.;
-                edgeCasesForShape = {
+                glm::vec4 edgeCasesForShape = {
                     bigSide_seconds, mWorldDims[1] - bigSide_seconds, smallSide_seconds, mWorldDims[3] -smallSide_seconds 
                 };
-
+                checkWallCollisions(pos,rb,edgeCasesForShape,
+                    sig.test(ecs_org.getComponentType<Platform>()));
             }
+            // BALL CALLISISONS
+            else if(sig.test(ecs_org.getComponentType<Ball>())){
+                // set because sometimes frames add the same squares
+                std::set<Entity> toDestroy; // for multiple balls -> multiple squuare deletions
+                auto &circle = ecs_org.getComponent<Ball>(entity);
+                auto &pos = ecs_org.getComponent<Position>(entity);
+                auto &rb = ecs_org.getComponent<RigidBody>(entity);
+                float radius_seconds = circle.radius/2.;
+                if(pos.position.y < - 2.0f*circle.radius){
+                    // delete ball if out of bottom
+                    ecs_org.destroyEntity(entity);
+                    gstate = GameState::GameOver;
+                    return;
+                }
+                glm::vec4 edgeCasesForShape = {
+                    radius_seconds, mWorldDims[1] - radius_seconds,radius_seconds, mWorldDims[3] - radius_seconds
+                };
 
+                checkWallCollisions(pos,rb,edgeCasesForShape,
+                    sig.test(ecs_org.getComponentType<Platform>()));
 
-
-            checkWallCollisions(pos,rb,edgeCasesForShape);
-
-            for (auto jt = std::next(it); jt != mEntities.end(); ++jt) {
-                checkEntityCollisions(*it, *jt);
+                for (auto const& entity2 : mEntities){
+                    if(entity != entity2){
+                        checkEntityCollisions(entity, entity2, toDestroy);
+                    }
+                }
+                for (auto e : toDestroy){
+                    ecs_org.destroyEntity(e);
+                }
             }
         }
     }
@@ -318,23 +362,29 @@ class InputSystem: public System{
     private:
     public:
     void init(){}
-    void update(Window &window) {
+    void update(GLuint &key) {
         for (auto const& entity : mEntities) {
             auto& pos = ecs_org.getComponent<Position>(entity);
+            auto& rb = ecs_org.getComponent<RigidBody>(entity);
             auto& input = ecs_org.getComponent<PlayerInput>(entity);
 
-            if(window.processKeyPress() == input.upKey){
-                // std::cout << glm::to_string(pos.position)<<"\n";
-                pos.position.y += 1.0f;
+            rb.velocity = glm::vec2{};
+            float speed = 400.0f;
+            if(key == input.upKey){
+                // rb.velocity.y = speed;
+                // pos.position.y += 1.0f;
             }
-            if(window.processKeyPress() == input.downKey){
-                pos.position.y -= 1.0f;
+            if(key == input.downKey){
+                // rb.velocity.y = -speed;
+                // pos.position.y -= 1.0f;
             }
-            if(window.processKeyPress() == input.rightKey){
-                pos.position.x += 1.0f;
+            if(key == input.rightKey){
+                rb.velocity.x = speed;
+                // pos.position.x += 1.0f;
             }
-            if(window.processKeyPress() == input.leftKey){
-                pos.position.x -= 1.0f;
+            if(key == input.leftKey){
+                rb.velocity.x = -speed;
+                // pos.position.x -= 1.0f;
             }
         }
     }

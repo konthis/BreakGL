@@ -47,8 +47,9 @@ class ComponentArray: public IComponentArray{
         }
 
         void deleteComponent(const Entity &entity){
+            if (mEntityToIndexMap.find(entity) == mEntityToIndexMap.end()) return; // not found, skip
             // have to swap last component to the deleted pos
-            assert(mEntityToIndexMap.find(entity)!=mEntityToIndexMap.end() && "Entity's component doesn't exist");
+            // assert(mEntityToIndexMap.find(entity)!=mEntityToIndexMap.end() && "Entity's component doesn't exist");
             size_t indexRemovedComponent = mEntityToIndexMap[entity];
             mComponentArray[indexRemovedComponent] = mComponentArray[mSize - 1];
 
@@ -57,7 +58,8 @@ class ComponentArray: public IComponentArray{
             mIndexToEntityMap[indexRemovedComponent] = lastEntity;
 
             mEntityToIndexMap.erase(entity);
-            mEntityToIndexMap.erase(mSize -1);
+            mIndexToEntityMap.erase(mSize -1);
+
             mSize--;
         }
 
@@ -173,4 +175,5 @@ struct PlayerInput {
     GLuint upKey = GLFW_KEY_UP;
     GLuint downKey = GLFW_KEY_DOWN;
     GLuint escKey = GLFW_KEY_ESCAPE;
+    GLuint bKey = GLFW_KEY_B;
 };

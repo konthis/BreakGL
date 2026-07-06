@@ -177,3 +177,9 @@ struct PlayerInput {
     GLuint escKey = GLFW_KEY_ESCAPE;
     GLuint bKey = GLFW_KEY_B;
 };
+
+struct Text {
+    std::string content;
+    glm::vec4 color;
+    GLfloat scale;
+};

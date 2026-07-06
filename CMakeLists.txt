@@ -10,14 +10,17 @@ add_executable(${PROJECT_NAME}
 find_package(OpenGL REQUIRED)
 find_package(glfw3 REQUIRED)
 find_package(glm CONFIG REQUIRED)
+find_package(Freetype REQUIRED)
 
 
 target_include_directories(${PROJECT_NAME} PRIVATE
                         include
+                        PRIVATE ${FREETYPE_INCLUDE_DIRS}
                         )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
                         glfw 
                         OpenGL::GL
                         glm::glm
+                        ${FREETYPE_LIBRARIES}
 )

@@ -71,6 +71,7 @@ Shader::Shader(const char* vertPath, const char* fragPath)
     setUniformLocation("uColor");
     setUniformLocation("uRadius");
     setUniformLocation("uTime");
+    setUniformLocation("uTextColor");
     //
 
     glDeleteShader(vert);

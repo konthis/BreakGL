@@ -4,6 +4,7 @@
 #include "systems.hpp"
 #include "scenes.hpp"
 #include "game_state.hpp"
+#include "text.hpp"
 
 
 class Game{

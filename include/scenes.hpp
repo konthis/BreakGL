@@ -29,3 +29,4 @@ struct BlockLayout {
 void loadSceneBalls(ECSOrganizer& ecs, Shader *ballShader);
 void loadSceneBallsAndPlatform(ECSOrganizer& ecs, Shader *ballShader, Shader *platformShader, glm::vec2 windowSize);
 void loadSceneBallPlatformSquares(ECSOrganizer& ecs, Shader *ballShader, Shader *platformShader, Shader *squareShader, glm::vec2 windowSize, GLuint HUDheight);
+void loadTextScene(ECSOrganizer& ecs, Shader *textShader, glm::vec2 windowSize);

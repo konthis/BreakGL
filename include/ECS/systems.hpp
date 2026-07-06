@@ -4,6 +4,9 @@
 #include "components.hpp"
 #include "shader.hpp"
 #include "game_state.hpp"
+#include "text.hpp"
+// #include <ft2build.h>
+// #include FT_FREETYPE_H 
 
 
 extern ECSOrganizer ecs_org;
@@ -36,81 +39,85 @@ class PhysicsSystem: public System{
 class MeshGenSystem: public System{
     private:
     public:
+
+    void initEntity(Entity entity){
+        Signature sig = ecs_org.getSignature(entity);
+        Position& pos = ecs_org.getComponent<Position>(entity);
+        Renderable& rend = ecs_org.getComponent<Renderable>(entity);
+
+        GLuint VAO{};
+	    GLuint VBO{};
+	    GLuint EBO{};
+        std::vector<glm::vec3> vertices;
+        std::vector<unsigned int> indices;
+
+        if(sig.test(ecs_org.getComponentType<Square>())){
+            Square sq = ecs_org.getComponent<Square>(entity);
+            vertices = {
+                glm::vec3{-sq.side/2.,sq.side/2.,0.},
+                glm::vec3{sq.side/2.,sq.side/2.,0.},
+                glm::vec3{sq.side/2.,-sq.side/2.,0.},
+                glm::vec3{-sq.side/2.,-sq.side/2.,0.},
+            };
+            indices = {0, 1, 2, 0, 2, 3};
+        }
+
+        else if(sig.test(ecs_org.getComponentType<Ball>())){
+            // make it like a fan, think about it like this
+            Ball ball = ecs_org.getComponent<Ball>(entity);
+            unsigned int segments = 36;
+            for (int i = 0; i <= segments; i++) {
+                float angle = (float)i / segments * 2.f * M_PI;
+                vertices.push_back({
+                    ball.radius * cos(angle),
+                    ball.radius * sin(angle),
+                    0.f
+                });
+            }
+            // make the fan part, center to top left to top right
+            for (int i = 1; i <= segments; i++) {
+                indices.push_back(0);
+                indices.push_back(i);
+                indices.push_back(i + 1);
+            }
+        }
+
+        else if(sig.test(ecs_org.getComponentType<Platform>())){
+            Platform pl = ecs_org.getComponent<Platform>(entity);
+            vertices = {
+                glm::vec3{-pl.bigSide/2.,pl.smallSide/2.,0.},
+                glm::vec3{pl.bigSide/2.,pl.smallSide/2.,0.},
+                glm::vec3{pl.bigSide/2.,-pl.smallSide/2.,0.},
+                glm::vec3{-pl.bigSide/2.,-pl.smallSide/2.,0.},
+            };
+
+            indices = {0, 1, 2, 0, 2, 3};
+        }
+
+        glGenVertexArrays(1,&VAO);
+        glGenBuffers(1,&VBO);
+        glGenBuffers(1,&EBO);
+
+        glBindVertexArray(VAO);
+
+        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * vertices.size(), vertices.data(), GL_STATIC_DRAW);
+
+
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int)*indices.size(), indices.data(), GL_STATIC_DRAW);
+
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)nullptr);glEnableVertexAttribArray(0);
+
+        glBindBuffer(GL_ARRAY_BUFFER, 0); 
+        glBindVertexArray(0); 
+
+        rend.EBO = EBO; rend.VAO = VAO; rend.VBO = VBO, rend.indexCount = indices.size();
+    }
+
     void init(){
         for (auto const& entity : mEntities) {
-            Signature sig = ecs_org.getSignature(entity);
-            Position& pos = ecs_org.getComponent<Position>(entity);
-            Renderable& rend = ecs_org.getComponent<Renderable>(entity);
-
-            GLuint VAO{};
-	        GLuint VBO{};
-	        GLuint EBO{};
-            std::vector<glm::vec3> vertices;
-            std::vector<unsigned int> indices;
-
-            if(sig.test(ecs_org.getComponentType<Square>())){
-                Square sq = ecs_org.getComponent<Square>(entity);
-                vertices = {
-                    glm::vec3{-sq.side/2.,sq.side/2.,0.},
-                    glm::vec3{sq.side/2.,sq.side/2.,0.},
-                    glm::vec3{sq.side/2.,-sq.side/2.,0.},
-                    glm::vec3{-sq.side/2.,-sq.side/2.,0.},
-                };
-                indices = {0, 1, 2, 0, 2, 3};
-            }
-
-            else if(sig.test(ecs_org.getComponentType<Ball>())){
-                // make it like a fan, think about it like this
-                Ball ball = ecs_org.getComponent<Ball>(entity);
-                unsigned int segments = 36;
-                for (int i = 0; i <= segments; i++) {
-                    float angle = (float)i / segments * 2.f * M_PI;
-                    vertices.push_back({
-                        ball.radius * cos(angle),
-                        ball.radius * sin(angle),
-                        0.f
-                    });
-                }
-                // make the fan part, center to top left to top right
-                for (int i = 1; i <= segments; i++) {
-                    indices.push_back(0);
-                    indices.push_back(i);
-                    indices.push_back(i + 1);
-                }
-            }
-
-            else if(sig.test(ecs_org.getComponentType<Platform>())){
-                Platform pl = ecs_org.getComponent<Platform>(entity);
-                vertices = {
-                    glm::vec3{-pl.bigSide/2.,pl.smallSide/2.,0.},
-                    glm::vec3{pl.bigSide/2.,pl.smallSide/2.,0.},
-                    glm::vec3{pl.bigSide/2.,-pl.smallSide/2.,0.},
-                    glm::vec3{-pl.bigSide/2.,-pl.smallSide/2.,0.},
-                };
-
-                indices = {0, 1, 2, 0, 2, 3};
-            }
-
-            glGenVertexArrays(1,&VAO);
-            glGenBuffers(1,&VBO);
-            glGenBuffers(1,&EBO);
-
-            glBindVertexArray(VAO);
-
-            glBindBuffer(GL_ARRAY_BUFFER, VBO);
-            glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * vertices.size(), vertices.data(), GL_STATIC_DRAW);
-
-
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-            glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int)*indices.size(), indices.data(), GL_STATIC_DRAW);
-
-            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)nullptr);glEnableVertexAttribArray(0);
-
-            glBindBuffer(GL_ARRAY_BUFFER, 0); 
-            glBindVertexArray(0); 
-
-            rend.EBO = EBO; rend.VAO = VAO; rend.VBO = VBO, rend.indexCount = indices.size();
-
+            initEntity(entity);
         }
     }
 };
@@ -388,4 +395,83 @@ class InputSystem: public System{
             }
         }
     }
+};
+
+class TextRenderSystem: public System{
+    private:
+        GLuint mVAO{};
+	    GLuint mVBO{};
+        TextRenderer mTR;
+        glm::mat4 mProjection;
+        Shader *mTextShader;
+    public:
+        ~TextRenderSystem() {
+            glDeleteVertexArrays(1, &mVAO);
+            glDeleteBuffers(1, &mVBO);
+        }
+        void init(GLuint width, GLuint height, Shader *textShader){
+            mTR.init();
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);  
+            mProjection = glm::ortho(0.0f,(float)width,0.0f,(float)height,-1.0f,1.0f);
+
+            glGenVertexArrays(1, &mVAO);
+            glGenBuffers(1, &mVBO);
+            glBindVertexArray(mVAO);
+            glBindBuffer(GL_ARRAY_BUFFER, mVBO);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, nullptr, GL_DYNAMIC_DRAW);
+            glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
+            glEnableVertexAttribArray(0);
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+            glBindVertexArray(0);
+            mTextShader = textShader;
+        }
+        void update(){
+            for (auto const& entity : mEntities){
+                auto const& text = ecs_org.getComponent<Text>(entity);
+                // position is middle left of the text
+                auto& pos = ecs_org.getComponent<Position>(entity);
+                mTextShader->activate();
+                mTextShader->setUniform<glm::vec4>("uTextColor",text.color);
+                mTextShader->setUniform<glm::mat4>("uProjection", mProjection);
+                glActiveTexture(GL_TEXTURE0);
+                glBindVertexArray(mVAO);
+                const auto& characters = mTR.getCharacters();
+                // iterate through all characters
+                std::string::const_iterator c;
+                float x = pos.position.x;
+                float y = pos.position.y;
+                for (c = text.content.begin(); c != text.content.end(); c++){
+                    Character ch = characters.at(*c);
+            
+                    float xpos = x + ch.bearing.x * text.scale;
+                    float ypos = y - (ch.size.y - ch.bearing.y) * text.scale;
+            
+                    float w = ch.size.x * text.scale;
+                    float h = ch.size.y * text.scale;
+                    // update VBO for each character
+                    float vertices[6][4] = {
+                        { xpos,     ypos + h,   0.0f, 0.0f },            
+                        { xpos,     ypos,       0.0f, 1.0f },
+                        { xpos + w, ypos,       1.0f, 1.0f },
+                    
+                        { xpos,     ypos + h,   0.0f, 0.0f },
+                        { xpos + w, ypos,       1.0f, 1.0f },
+                        { xpos + w, ypos + h,   1.0f, 0.0f }           
+                    };
+                    // render glyph texture over quad
+                    glBindTexture(GL_TEXTURE_2D, ch.textureID);
+                    // update content of VBO memory
+                    glBindBuffer(GL_ARRAY_BUFFER, mVBO);
+                    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices); 
+                    glBindBuffer(GL_ARRAY_BUFFER, 0);
+                    // render quad
+                    glDrawArrays(GL_TRIANGLES, 0, 6);
+                    // now advance cursors for next glyph (note that advance is number of 1/64 pixels)
+                    x += (ch.advance >> 6) * text.scale; // bitshift by 6 to get value in pixels (2^6 = 64)
+                }
+                glBindVertexArray(0);
+                glBindTexture(GL_TEXTURE_2D, 0);
+            }
+        }
 };

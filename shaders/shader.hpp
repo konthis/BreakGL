@@ -33,7 +33,7 @@ class Shader{
     		// else if constexpr (std::is_same_v<T, glm::vec2>)
     		//     glUniform2f(loc, value.x, value.y);
     		// else if constexpr (std::is_same_v<T, glm::vec3>)
-    		    // glUniform3f(loc, value.x, value.y, value.z);
+    		//     glUniform3f(loc, value.x, value.y, value.z);
     		else if constexpr (std::is_same_v<T, glm::vec4>)
     		    glUniform4f(loc, value.r, value.g, value.b, value.a);
     		else if constexpr (std::is_same_v<T, glm::mat4>)

@@ -101,4 +101,29 @@ void loadSceneBallPlatformSquares(ECSOrganizer& ecs, Shader *ballShader, Shader 
     }
     //
 
+    // text
+    e = ecs.createEntity();
+    ecs.addComponent<Text>(e,Text{
+        .content = "FPS: ",
+        .color = glm::vec4{0.0f,1.0f,0.0f,1.0f},
+        .scale = 0.8f
+    });
+    ecs.addComponent<Position>(e, Position{ 
+        .position = glm::vec2{0.0f,windowSize.y-HUDheight + 15.0f}
+    });
+
+
+}
+
+void loadTextScene(ECSOrganizer& ecs, Shader *textShader, glm::vec2 windowSize){
+    Entity e = ecs.createEntity();
+    ecs.addComponent<Text>(e,Text{
+        .content = "test",
+        .color = glm::vec4{1.0f,1.0f,1.0f,1.0f},
+        .scale = 1.0f
+    });
+    ecs.addComponent<Position>(e, Position{ 
+        .position = glm::vec2{200.0f,250.0f}
+    });
+
 }

@@ -29,7 +29,7 @@ class TextRenderer{
             for (auto& [c, ch] : mCharacters)
                 glDeleteTextures(1, &ch.textureID);
         }
-        void init(){
+        void init(unsigned int pixelSize){
             if (FT_Init_FreeType(&mFTLib))
             {
                 std::cout << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
@@ -40,7 +40,7 @@ class TextRenderer{
                 std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;  
             }
             
-            FT_Set_Pixel_Sizes(mFTFace, 0, 40);  
+            FT_Set_Pixel_Sizes(mFTFace, 0, pixelSize);  
 
             glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
             for (unsigned char c = 32; c < 127; c++){
@@ -85,6 +85,11 @@ class TextRenderer{
 
         const std::map<char, Character>& getCharacters() const { return mCharacters; }
 
-
-
 };
+
+inline float getTextWidth(const std::map<char, Character>& chars, const std::string& text, float scale) {
+    float width = 0;
+    for (char c : text)
+        width += (chars.at(c).advance >> 6) * scale;
+    return width;
+}

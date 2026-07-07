@@ -1,6 +1,7 @@
 #pragma once
 #include "entities.hpp"
 #include "shader.hpp"
+#include "game_state.hpp"
 #include <unordered_map>
 #include <memory>
 #define GLM_ENABLE_EXPERIMENTAL // enables the to_string
@@ -182,4 +183,10 @@ struct Text {
     std::string content;
     glm::vec4 color;
     GLfloat scale;
+    bool centered = false;
 };
+
+struct MenuOption{
+    GLuint index;
+    bool isSelected = false;
+}; 

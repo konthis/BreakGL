@@ -26,8 +26,10 @@ GLuint Window::processKeyPress(GameState &gstate)
         return GLFW_KEY_RIGHT;
     }
     if (glfwGetKey(mWindow, GLFW_KEY_ESCAPE) == GLFW_PRESS){
-        gstate = GameState::Menu;
         return GLFW_KEY_ESCAPE;
+    }
+    if (glfwGetKey(mWindow, GLFW_KEY_ENTER) == GLFW_PRESS){
+        return GLFW_KEY_ENTER;
     }
     return GLFW_KEY_UNKNOWN;
 }
@@ -70,7 +72,6 @@ void Window::swapBuffers(){
 
 void Window::pollEvents(){
     glfwPollEvents();
-    // processKeyPress();
 }
 
 

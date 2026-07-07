@@ -19,7 +19,7 @@ void loadSceneBalls(ECSOrganizer& ecs, Shader *ballShader) {
 }
 
 
-void loadSceneBallsAndPlatform(ECSOrganizer& ecs, Shader *ballShader, Shader *platformShader, glm::vec2 windowSize){
+void loadSceneBallsAndPlatform(ECSOrganizer& ecs, std::unique_ptr<Shader> ballShader, std::unique_ptr<Shader> platformShader, glm::vec2 windowSize){
 
     std::mt19937 rng(1337);
     std::uniform_real_distribution<float> posX(50.f, 750.f);
@@ -33,7 +33,7 @@ void loadSceneBallsAndPlatform(ECSOrganizer& ecs, Shader *ballShader, Shader *pl
         ecs.addComponent<Position>(e, Position{ .position = {posX(rng), posY(rng)} });
         ecs.addComponent<RigidBody>(e, RigidBody{ .velocity = {vel(rng), vel(rng)} });
         ecs.addComponent<Collider>(e,Collider{});
-        ecs.addComponent<Renderable>(e, Renderable{ ballShader, .color = {col(rng),col(rng),col(rng),1.0f} });
+        ecs.addComponent<Renderable>(e, Renderable{ ballShader.get(), .color = {col(rng),col(rng),col(rng),1.0f} });
     }
     Entity e = ecs.createEntity();
     Platform platform = Platform{.smallSide = 15.0, .bigSide = 100.0f};
@@ -42,7 +42,7 @@ void loadSceneBallsAndPlatform(ECSOrganizer& ecs, Shader *ballShader, Shader *pl
         .position = {windowSize.x/2.0f, platform.smallSide/2.0f}});
     ecs.addComponent<RigidBody>(e, RigidBody{ .velocity = {0.0f, 0.0f}});
     ecs.addComponent<Collider>(e,Collider{});
-    ecs.addComponent<Renderable>(e, Renderable{ platformShader, .color = {col(rng),col(rng),col(rng),1.0f} });
+    ecs.addComponent<Renderable>(e, Renderable{ platformShader.get(), .color = {col(rng),col(rng),col(rng),1.0f} });
     ecs.addComponent<PlayerInput>(e,PlayerInput{});
 
 }
@@ -72,18 +72,18 @@ void loadSceneBallPlatformSquares(ECSOrganizer& ecs, Shader *ballShader, Shader 
     e = ecs.createEntity();
     ecs.addComponent<Ball>(e, Ball{ .radius = 10.f });
     // ecs.addComponent<Gravity>(e, Gravity{ .value= 0.f });
-    ecs.addComponent<Position>(e, Position{ .position = {windowSize.x/2.0f, windowSize.y/5.0f} });
+    ecs.addComponent<Position>(e, Position{ .position = {windowSize.x/2.0f, windowSize.y/7.0f} });
     ecs.addComponent<RigidBody>(e, RigidBody{ .velocity = {0.0f, 250.0f}});
     ecs.addComponent<Collider>(e,Collider{});
     ecs.addComponent<Renderable>(e, Renderable{ ballShader, .color = {col(rng),col(rng),col(rng),1.0f} });
     //
 
     // squares
-    GLfloat squareSide = 19.0f;
+    GLfloat squareSide = 19.5f;
     BlockLayout bl = BlockLayout{
         .start = glm::vec2{squareSide/2.0f,(windowSize.y-HUDheight)-squareSide/2.0f},
         .size = glm::vec2{squareSide,squareSide},
-        .gap = glm::vec2{1.0f,1.0f},
+        .gap = glm::vec2{0.5f,0.5f},
         .cols = 40,
         .rows = 10,
         .max = 150
@@ -105,8 +105,8 @@ void loadSceneBallPlatformSquares(ECSOrganizer& ecs, Shader *ballShader, Shader 
     e = ecs.createEntity();
     ecs.addComponent<Text>(e,Text{
         .content = "FPS: ",
-        .color = glm::vec4{0.0f,1.0f,0.0f,1.0f},
-        .scale = 0.8f
+        .color = COLOR_GREEN,
+        .scale = 0.5f
     });
     ecs.addComponent<Position>(e, Position{ 
         .position = glm::vec2{0.0f,windowSize.y-HUDheight + 15.0f}
@@ -115,15 +115,73 @@ void loadSceneBallPlatformSquares(ECSOrganizer& ecs, Shader *ballShader, Shader 
 
 }
 
-void loadTextScene(ECSOrganizer& ecs, Shader *textShader, glm::vec2 windowSize){
+
+void loadMainMenuScene(ECSOrganizer& ecs, Shader *textShader, glm::vec2 windowSize){
+    
     Entity e = ecs.createEntity();
+    ecs.addComponent<MenuOption>(e, MenuOption{
+        .index = 0,
+        .isSelected = true
+    });
     ecs.addComponent<Text>(e,Text{
-        .content = "test",
-        .color = glm::vec4{1.0f,1.0f,1.0f,1.0f},
-        .scale = 1.0f
+        .content = "Choose game scene",
+        .color = MENU_SELECTED_TEXT_COLOR,
+        .scale = 1.0f,
+        .centered = true,
     });
     ecs.addComponent<Position>(e, Position{ 
-        .position = glm::vec2{200.0f,250.0f}
+        .position = glm::vec2{windowSize.x/2.0f,4.0f*windowSize.y/5.0f}
+    });
+
+    e = ecs.createEntity();
+    ecs.addComponent<MenuOption>(e, MenuOption{
+        .index = 1,
+        .isSelected = false
+    });
+    ecs.addComponent<Text>(e,Text{
+        .content = "Play",
+        .color = MENU_TEXT_COLOR,
+        .scale = 1.0f,
+        .centered = true,
+    });
+    ecs.addComponent<Position>(e, Position{ 
+        .position = glm::vec2{windowSize.x/2.0f,3.0f*windowSize.y/5.0f}
+    });
+
+    e = ecs.createEntity();
+    ecs.addComponent<MenuOption>(e, MenuOption{
+        .index = 2,
+        .isSelected = false
+    });
+    ecs.addComponent<Text>(e,Text{
+        .content = "Settings",
+        .color = MENU_TEXT_COLOR,
+        .scale = 1.0f,
+        .centered = true,
+    });
+    ecs.addComponent<Position>(e, Position{ 
+        .position = glm::vec2{windowSize.x/2.0f,2.0f*windowSize.y/5.0f}
+    });
+
+    e = ecs.createEntity();
+    ecs.addComponent<MenuOption>(e, MenuOption{
+        .index = 3,
+        .isSelected = false
+    });
+    ecs.addComponent<Text>(e,Text{
+        .content = "Quit",
+        .color = MENU_TEXT_COLOR,
+        .scale = 1.0f,
+        .centered = true,
+    });
+    ecs.addComponent<Position>(e, Position{ 
+        .position = glm::vec2{windowSize.x/2.0f,windowSize.y/5.0f}
     });
 
 }
+
+
+
+
+void loadESCMenuScene(){}
+void loadSettingsScene(){}

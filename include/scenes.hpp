@@ -1,6 +1,7 @@
 #pragma once
 #include "ECSorganizer.hpp"
 #include "components.hpp"
+#include "constants.hpp"
 #include <random>
 #include <glm/gtc/constants.hpp>
 
@@ -29,4 +30,5 @@ struct BlockLayout {
 void loadSceneBalls(ECSOrganizer& ecs, Shader *ballShader);
 void loadSceneBallsAndPlatform(ECSOrganizer& ecs, Shader *ballShader, Shader *platformShader, glm::vec2 windowSize);
 void loadSceneBallPlatformSquares(ECSOrganizer& ecs, Shader *ballShader, Shader *platformShader, Shader *squareShader, glm::vec2 windowSize, GLuint HUDheight);
-void loadTextScene(ECSOrganizer& ecs, Shader *textShader, glm::vec2 windowSize);
+
+void loadMainMenuScene(ECSOrganizer& ecs, Shader *textShader, glm::vec2 windowSize);

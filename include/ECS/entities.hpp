@@ -53,4 +53,12 @@ class EntityManager{
     void printEntity(const Entity &entity){
         std::cout << "Entity " << entity << "\nSignature " << getSignature(entity) << "\n";
     }
+
+    std::vector<Entity> getLivingEntities() {
+        std::vector<Entity> alive;
+        for (Entity e = 0; e < MAX_ENTITIES; e++)
+            if (mSignatures[e].any())
+                alive.push_back(e);
+        return alive;
+    }
 };

@@ -5,6 +5,7 @@
 #include "shader.hpp"
 #include "game_state.hpp"
 #include "text.hpp"
+#include "constants.hpp"
 // #include <ft2build.h>
 // #include FT_FREETYPE_H 
 
@@ -16,12 +17,7 @@ class PhysicsSystem: public System{
     public:
     
         void init(){
-            // for (auto const& entity : mEntities) {
-            //     Signature sig = ecs_org.getSignature(entity);
-            //     auto& grav = ecs_org.getComponent<Gravity>(entity);
-            //     auto& rb = ecs_org.getComponent<RigidBody>(entity);
-            //     rb.acceleration.y = -grav.value;
-            // }
+
         }
 
         void update(float dt){
@@ -409,8 +405,8 @@ class TextRenderSystem: public System{
             glDeleteVertexArrays(1, &mVAO);
             glDeleteBuffers(1, &mVBO);
         }
-        void init(GLuint width, GLuint height, Shader *textShader){
-            mTR.init();
+        void init(GLuint width, GLuint height, Shader *textShader, unsigned int pixelSize){
+            mTR.init(pixelSize);
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);  
             mProjection = glm::ortho(0.0f,(float)width,0.0f,(float)height,-1.0f,1.0f);
@@ -439,7 +435,7 @@ class TextRenderSystem: public System{
                 const auto& characters = mTR.getCharacters();
                 // iterate through all characters
                 std::string::const_iterator c;
-                float x = pos.position.x;
+                float x = text.centered?pos.position.x-getTextWidth(characters,text.content,text.scale)/2.0f:pos.position.x;
                 float y = pos.position.y;
                 for (c = text.content.begin(); c != text.content.end(); c++){
                     Character ch = characters.at(*c);
@@ -474,4 +470,69 @@ class TextRenderSystem: public System{
                 glBindTexture(GL_TEXTURE_2D, 0);
             }
         }
+        
+};
+
+class MenuInputSystem: public System{
+    private:
+        GLuint mSelectedIdx = 0;
+        GLuint mPrevKey = GLFW_KEY_UNKNOWN; // to change keys on diff keypress
+        float mKeyHeldTime = 0.0f;
+        const float KEY_REPEAT = 0.15f; // seconds between moves while held
+
+        bool handleKey(GLuint &key){
+            GLuint maxOpts = (GLuint)mEntities.size();
+            if(key == GLFW_KEY_UP){
+                mSelectedIdx = mSelectedIdx>0?mSelectedIdx-1:0;
+            }
+            if(key == GLFW_KEY_DOWN){
+                mSelectedIdx = mSelectedIdx<maxOpts-1?mSelectedIdx+1:maxOpts- 1;
+            }
+            if(key == GLFW_KEY_RIGHT){
+            }
+            if(key == GLFW_KEY_LEFT){
+            }
+            if(key == GLFW_KEY_ENTER){
+                return true;
+            }
+            for (auto const& entity : mEntities) {
+                auto& menuopt = ecs_org.getComponent<MenuOption>(entity);
+                auto& text = ecs_org.getComponent<Text>(entity);
+                bool isSelected = (menuopt.index == mSelectedIdx);
+                menuopt.isSelected = isSelected;
+                text.color = isSelected ? MENU_SELECTED_TEXT_COLOR : MENU_TEXT_COLOR;
+            }
+            return false;
+        }
+    public:
+    void init(){
+        for (auto const& entity : mEntities){
+            auto& menuopt = ecs_org.getComponent<MenuOption>(entity);
+            if(menuopt.isSelected){
+                auto& text = ecs_org.getComponent<Text>(entity);
+                text.color = MENU_SELECTED_TEXT_COLOR;
+            }
+        }
+    }
+    int update(GLuint &key, float dt) {
+        bool enterPressed = false;
+        if (key != mPrevKey) { // new press
+            enterPressed = handleKey(key);
+            mKeyHeldTime = 0.0f;
+        } 
+        else if (key != GLFW_KEY_UNKNOWN) {  // held
+            mKeyHeldTime += dt;
+            if (mKeyHeldTime >= KEY_REPEAT) {
+                enterPressed = handleKey(key);
+                mKeyHeldTime = 0.0f;
+            }
+        }
+        mPrevKey = key;
+        if(enterPressed){
+            return mSelectedIdx;
+        }
+        else{
+            return -1;
+        }
+    }
 };

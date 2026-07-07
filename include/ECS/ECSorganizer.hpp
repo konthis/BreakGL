@@ -84,4 +84,11 @@ class ECSOrganizer{
 		mSystemManager->setSystemSignature<T>(signature);
 	}
 
+    void reset() {
+        // remove all entities
+        auto alive = mEntityManager->getLivingEntities();
+        for (auto e : alive)
+            destroyEntity(e);
+    }
+
 };

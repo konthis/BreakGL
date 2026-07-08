@@ -3,7 +3,8 @@
 ECSOrganizer ecs_org;
 
 void Game::init(){
-    mWindow.init(mWidth, mHeight, "BreakGL");
+    mWindow.init(WINDOW_WIDTH, WINDOW_HEIGHT, "BreakGL");
+    // mWindow.init(mWidth, mHeight, "BreakGL");
     mSimpleShader = std::make_unique<Shader>(SHADER_DIR "/simple/simple.vert", SHADER_DIR "/simple/simple.frag");
 
     mBallShader = std::make_unique<Shader>(SHADER_DIR "/ball/ball.vert",SHADER_DIR "/ball/ball.frag");
@@ -22,6 +23,7 @@ void Game::init(){
     ecs_org.createComponent<Position>();
     ecs_org.createComponent<Collider>();
     ecs_org.createComponent<RigidBody>();
+    ecs_org.createComponent<PauseMenu>();
     ecs_org.createComponent<Renderable>();
     ecs_org.createComponent<MenuOption>();
     ecs_org.createComponent<PlayerInput>();
@@ -104,10 +106,10 @@ void Game::run(){
     float currFPS{};
     unsigned int countForFPS = 0;
 
+    std::set<Entity> toDestroy; // for multiple balls -> multiple squuare deletions
+    std::set<unsigned int> toCreate{}; // powerup
+
     while(!mWindow.shouldClose()){
-        
-
-
         mWindow.pollEvents();
         GLuint keyPressed = mWindow.processKeyPress(mState);
         switch(mState){
@@ -117,7 +119,7 @@ void Game::run(){
                 currFPS += (1.0f/(currTime-mLastTime))/30.0f;
                 mLastTime = currTime;
                 countForFPS++;
-                if(countForFPS>=29){
+                if(countForFPS>29){
                     countForFPS = 0;
                     auto & t = ecs_org.getComponent<Text>(eFPS);
                     t.content = std::to_string((int)currFPS);
@@ -130,17 +132,39 @@ void Game::run(){
                     mPhysicsSystem->update(mDT);
                     mTimeAccumulator -= mDT;
                 }
-                mCollisionSystem->update(mState);
+                mCollisionSystem->update(mState, toDestroy, toCreate);
+                // 
+                for (auto e : toDestroy){
+                    auto const& sig = ecs_org.getSignature(e);
+                    if(sig.test(ecs_org.getComponentType<Ball>())){
+                        mBallCount--;
+                    }
+                    ecs_org.destroyEntity(e);
+                }
+                if(!mBallCount){
+                    setGameState(GameState::GameOver);
+                }
+
+                for (auto& e: toCreate) {
+                    auto const& sig = ecs_org.getSignature(e);
+                   if(sig.test(ecs_org.getComponentType<Ball>()))
+                    mBallCount++;
+                    auto& pos = ecs_org.getComponent<Position>(e);
+                    mMeshGenSystem->initEntity(e);
+                }
+
+                toDestroy.clear();
+                toCreate.clear();
+
                 mRenderSystem->update();
                 mTextRenderSystem->update();
 
                 if(keyPressed==GLFW_KEY_ESCAPE){
-                    setGameState(GameState::MainMenu);
+                    setGameState(GameState::Paused);
                 }
                 break;
             }
             case GameState::MainMenu:{
-                // mState = GameState::Playing;
                 int confirmed = mMenuInputSystem->update(keyPressed,mDT/2.0f);
                 mTextRenderSystem->update();
                 if (confirmed==1){
@@ -151,22 +175,33 @@ void Game::run(){
                 }
                 break;
             }
-            case GameState::ESCMenu:
-                mState = GameState::Playing;
+            case GameState::Paused:{
+                int confirmed = mMenuInputSystem->update(keyPressed,mDT/2.0f);
+                mTextRenderSystem->update();
+                if (confirmed == 0){
+                    // just continue, but still reset the times
+                    mLastTime = (float)glfwGetTime();
+                    mTimeAccumulator = 0.0f;
+                    for(auto &e : ecs_org.getEntitiesOfComponent<PauseMenu>()){
+                        ecs_org.destroyEntity(e);
+                    }
+                    mState = GameState::Playing;
+
+                }
+                else if (confirmed == 1){
+                    setGameState(GameState::MainMenu);
+                }
                 break;
-            case GameState::Paused:
-                mState = GameState::Playing;
-                break;
+            }
             case GameState::GameOver:{
-                // SPAWN A BALL AGAIN FOR NOW
-                mState = GameState::Playing;
-                Entity ball = ecs_org.createEntity();
-                ecs_org.addComponent<Ball>(ball, Ball{ .radius = 10.f });
-                ecs_org.addComponent<Position>(ball, Position{ .position = {mWidth/2.0f, mWidth/5.0f} });
-                ecs_org.addComponent<RigidBody>(ball, RigidBody{ .velocity = {200.0f, 250.0f}});
-                ecs_org.addComponent<Collider>(ball,Collider{});
-                ecs_org.addComponent<Renderable>(ball, Renderable{ mBallShader.get(), .color = {1.0f,1.0f,1.0f,1.0f} });
-                mMeshGenSystem->initEntity(ball);
+                int confirmed = mMenuInputSystem->update(keyPressed,mDT/2.0f);
+                mTextRenderSystem->update();
+                if (confirmed==0){
+                    setGameState(GameState::MainMenu);
+                }
+                else if (confirmed == 1){
+                    exit(0);
+                }
                 break;
 
             }
@@ -185,33 +220,35 @@ void Game::kill(){
 
 
 void Game::setGameState(GameState newState) {
-    ecs_org.reset();
     switch(newState) {
         case GameState::Playing:{
+            ecs_org.reset();
+            mBallCount = 0;
             // FPS ENTITY
-            eFPS = ecs_org.createEntity();
-            ecs_org.addComponent<Text>(eFPS,Text{
-                .content = "",
-                .color = glm::vec4{0.0f,1.0f,0.0f,1.0f},
-                .scale = 0.5f
-            });
-            ecs_org.addComponent<Position>(eFPS, Position{ 
-                .position = glm::vec2{50.0f,mHeight-mHUDheight + 15.0f}
-            });
-            //
-            loadSceneBallPlatformSquares(ecs_org, mBallShader.get(),mPlatformShader.get(), mSimpleShader.get(), glm::vec2{mWidth,mHeight}, mHUDheight);
+            eFPS = createText(ecs_org,"",
+
+                glm::vec4{0.0f,1.0f,0.0f,1.0f},
+                0.5f,
+                glm::vec2{50.0f, WINDOW_HEIGHT-HUD_HEIGHT+25.0f}
+            );
+            loadScene1(ecs_org, mBallShader.get(),mPlatformShader.get(), mSimpleShader.get(), glm::vec2{mWidth,mHeight}, mHUDheight);
+            mBallCount++;
             mMeshGenSystem->init();
             break;
         }    
         case GameState::MainMenu:{
+            ecs_org.reset();
             glClear(GL_COLOR_BUFFER_BIT);
             loadMainMenuScene(ecs_org, mTextShader.get(), glm::vec2{mWidth,mHeight});
             break;
         }
-        case GameState::ESCMenu:{
+        case GameState::Paused:{
+            loadPausedScene(ecs_org, mTextShader.get());
             break;
         }
-        case GameState::Paused:{
+        case GameState::GameOver:{
+            ecs_org.reset();
+            loadGameOverScene(ecs_org,mTextShader.get());
             break;
         }
         case GameState::Win:{

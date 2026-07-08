@@ -18,10 +18,9 @@ float rand(vec2 seed) {
 void main()
 {
     vec4 color = uColor;
-    float dist = length(vPos.xy);
-    color.r *= (sin(PI * uTime)/4.0+0.6);
-    color.b *= (sin(PI * uTime * 0.5)/4.0+0.6);
-    color.g *= (sin(PI * uTime * 1.5)/4.0+0.6);
+    // float dist = length(vPos.xy);
+    // color.r *= (sin(PI * uTime)/4.0+0.6);
+    // color.b *= (sin(PI * uTime * 0.5)/4.0+0.6);
+    // color.g *= (sin(PI * uTime * 1.5)/4.0+0.6);
     FragColor = color;
-    // FragColor = (smoothstep(0.4,0.45,dist) * (1.0 - smoothstep(0.85,1.0,dist)))*color;
 }

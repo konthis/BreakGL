@@ -91,4 +91,18 @@ class ECSOrganizer{
             destroyEntity(e);
     }
 
+    template<typename T>
+    std::set<Entity> getEntitiesOfComponent(){
+        std::set<Entity> entities;
+        auto alive = mEntityManager->getLivingEntities();
+        for (auto e : alive){
+            auto const& sig = getSignature(e);
+            if(sig.test(getComponentType<T>())){
+                entities.insert(e);
+            }
+        }
+        return entities;
+    }
+
+
 };

@@ -30,9 +30,10 @@ class Game{
         std::shared_ptr<MenuInputSystem> mMenuInputSystem;
         // FPS entity
         Entity eFPS;
-        // 
         float mLastTime{};
         float mTimeAccumulator{};
+        // balls
+        GLuint mBallCount = 0;
 
 
         void setGameState(GameState newState);

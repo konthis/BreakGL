@@ -13,9 +13,9 @@ out vec4 FragColor;
 void main()
 {
     vec4 color = uColor;
-    float dist = length(vPos.xy)/20.0;
-    color.r *= (sin(PI * uTime)/4.0+0.5);
-    color.b *= (sin(PI * uTime * 0.5)/4.0+0.5);
-    color.g *= (sin(PI * uTime * 1.5)/4.0+0.5);
+    // float dist = length(vPos.xy)/20.0;
+    // color.r *= (sin(PI * uTime)/4.0+0.5);
+    // color.b *= (sin(PI * uTime * 0.5)/4.0+0.5);
+    // color.g *= (sin(PI * uTime * 1.5)/4.0+0.5);
     FragColor = color;
 }

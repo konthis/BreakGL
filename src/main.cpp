@@ -1,15 +1,13 @@
-#include "systems.hpp"
-
-#include <random>
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-#include <glm/trigonometric.hpp>
-#include <chrono>
-
-#include <iostream>
+#include "game.hpp"
 
 
-int main()
-{
+int main(){
+    
 
+    Game game;
+    game.init();
+    game.run();
+    game.kill();
+
+    return 0;
 }

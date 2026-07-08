@@ -6,8 +6,7 @@
 #include "game_state.hpp"
 #include "text.hpp"
 #include "constants.hpp"
-// #include <ft2build.h>
-// #include FT_FREETYPE_H 
+#include "prefabs.hpp"
 
 
 extern ECSOrganizer ecs_org;
@@ -25,7 +24,6 @@ class PhysicsSystem: public System{
                 Signature sig = ecs_org.getSignature(entity);
                 auto& rb = ecs_org.getComponent<RigidBody>(entity);
                 auto& pos = ecs_org.getComponent<Position>(entity);
-
                 rb.velocity += rb.acceleration*dt;
                 pos.position += rb.velocity*dt;
             }
@@ -130,8 +128,6 @@ class RenderSystem: public System{
         void update(){
             glClear(GL_COLOR_BUFFER_BIT);
 
-            float radius; // of balls, prolly change, dont like it here
-
             for (auto const& entity : mEntities){
 
                 auto& rend = ecs_org.getComponent<Renderable>(entity);
@@ -142,8 +138,7 @@ class RenderSystem: public System{
 
                 Signature sig = ecs_org.getSignature(entity);
                 if (sig.test(ecs_org.getComponentType<Ball>())){
-                    radius = ecs_org.getComponent<Ball>(entity).radius;
-                    rend.shader->setUniform<float>("uRadius",radius);
+                    rend.shader->setUniform<float>("uRadius",BALL_RADIUS);
                 }
 
                 rend.shader->setUniform<glm::mat4>("uModel",rend.modelMatrix);
@@ -182,7 +177,7 @@ class CollisionSystem: public System{
             }
         }
 
-        void checkEntityCollisions(Entity e1, Entity e2, std::set<Entity>& toDestroy){
+        void checkEntityCollisions(Entity e1, Entity e2, std::set<Entity>& toDestroy, unsigned int &toCreate){
             auto& posE1 = ecs_org.getComponent<Position>(e1);
             auto &rbE1 = ecs_org.getComponent<RigidBody>(e1);
             auto& posE2 = ecs_org.getComponent<Position>(e2);
@@ -211,12 +206,13 @@ class CollisionSystem: public System{
                     posE1.position -= n * overlap * 0.5f;
                     posE2.position += n * overlap * 0.5f;
 
+                    // THIS COMMEND PART IS FOR NORMAL VELOCITY CHANGE, IM BREAKOUT, WE HAVE FIXED VELOCITIES
                     // update velocities on the norm
-                    float dvn = glm::dot(rbE1.velocity - rbE2.velocity, n);
-                    if (dvn > 0.f) {  // only resolve if moving toward each other
-                        rbE1.velocity -= dvn * n;
-                        rbE2.velocity += dvn * n;
-                    }
+                    // float dvn = glm::dot(rbE1.velocity - rbE2.velocity, n);
+                    // if (dvn > 0.f) {  // only resolve if moving toward each other
+                    //     rbE1.velocity -= dvn * n;
+                    //     rbE2.velocity += dvn * n;
+                    // }
                 }
             }
 
@@ -291,7 +287,7 @@ class CollisionSystem: public System{
                 glm::vec2 diff = ballPosition.position - contactPoint;
                 distance = glm::length(diff); 
 
-                if (distance < rad) {
+                if (distance <= rad) { // if collision
                     glm::vec2 normal = glm::normalize(diff);
                     ballPosition.position += normal * (rad - distance);
                 
@@ -300,6 +296,12 @@ class CollisionSystem: public System{
                         ballRB.velocity -= 2.f * dvn * normal;
                     }
                     toDestroy.insert(sqE);
+
+                    if(sq.power == PowerUp::SUMMON_BALL){
+                        // JUST SUMMON ANOTHER BALL FOR NOW
+                        toCreate++;
+                        //
+                    }
                 }
             }
         }
@@ -311,7 +313,7 @@ class CollisionSystem: public System{
         mWorldDims = worldDims;
     }
 
-    void update(GameState &gstate){
+    void update(GameState &gstate, std::set<Entity>&toDestroy, std::set<Entity> &toCreate){
         for (auto const& entity : mEntities){
             auto const& sig = ecs_org.getSignature(entity);
             // PLATFORM COLLISION (ONLY WITH WALLS NOW)
@@ -327,18 +329,17 @@ class CollisionSystem: public System{
                 checkWallCollisions(pos,rb,edgeCasesForShape,
                     sig.test(ecs_org.getComponentType<Platform>()));
             }
-            // BALL CALLISISONS
+            // BALL COLLISIONS
             else if(sig.test(ecs_org.getComponentType<Ball>())){
                 // set because sometimes frames add the same squares
-                std::set<Entity> toDestroy; // for multiple balls -> multiple squuare deletions
-                auto &circle = ecs_org.getComponent<Ball>(entity);
+                auto &ball = ecs_org.getComponent<Ball>(entity);
                 auto &pos = ecs_org.getComponent<Position>(entity);
                 auto &rb = ecs_org.getComponent<RigidBody>(entity);
-                float radius_seconds = circle.radius/2.;
-                if(pos.position.y < - 2.0f*circle.radius){
+                float radius_seconds = BALL_RADIUS/2.;
+                if(pos.position.y < - 2.0f*BALL_RADIUS){
                     // delete ball if out of bottom
-                    ecs_org.destroyEntity(entity);
-                    gstate = GameState::GameOver;
+                    // ecs_org.destroyEntity(entity);
+                    toDestroy.insert(entity);
                     return;
                 }
                 glm::vec4 edgeCasesForShape = {
@@ -348,13 +349,22 @@ class CollisionSystem: public System{
                 checkWallCollisions(pos,rb,edgeCasesForShape,
                     sig.test(ecs_org.getComponentType<Platform>()));
 
+                unsigned int toCreateNum = 0;
                 for (auto const& entity2 : mEntities){
                     if(entity != entity2){
-                        checkEntityCollisions(entity, entity2, toDestroy);
+                        checkEntityCollisions(entity, entity2, toDestroy, toCreateNum);
+                        if(toCreateNum) break; // only 1 detroy per frame PER BALL
                     }
                 }
-                for (auto e : toDestroy){
-                    ecs_org.destroyEntity(e);
+                if(toCreateNum){
+                    auto &rend = ecs_org.getComponent<Renderable>(entity);
+
+                    for (int i = 0; i < toCreateNum; i++){
+                        toCreate.insert(createBall(ecs_org, rend.shader,
+                        glm::vec2{WINDOW_WIDTH/2.0f,WINDOW_HEIGHT/7.0f},
+                        -rb.velocity
+                        ));
+                    }
                 }
             }
         }
@@ -535,4 +545,6 @@ class MenuInputSystem: public System{
             return -1;
         }
     }
+
+
 };

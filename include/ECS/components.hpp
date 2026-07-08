@@ -1,4 +1,5 @@
 #pragma once
+#include "constants.hpp"
 #include "entities.hpp"
 #include "shader.hpp"
 #include "game_state.hpp"
@@ -141,6 +142,7 @@ struct Ball{
 
 struct Square{
     GLfloat side;
+    PowerUp power = PowerUp::EMPTY;
 };
 
 struct Platform{
@@ -171,12 +173,12 @@ struct Renderable {
 };
 
 struct PlayerInput {
-    GLuint leftKey = GLFW_KEY_LEFT;
-    GLuint rightKey = GLFW_KEY_RIGHT;
-    GLuint upKey = GLFW_KEY_UP;
-    GLuint downKey = GLFW_KEY_DOWN;
-    GLuint escKey = GLFW_KEY_ESCAPE;
-    GLuint bKey = GLFW_KEY_B;
+    GLuint leftKey      = GLFW_KEY_LEFT;
+    GLuint rightKey     = GLFW_KEY_RIGHT;
+    GLuint upKey        = GLFW_KEY_UP;
+    GLuint downKey      = GLFW_KEY_DOWN;
+    GLuint escKey       = GLFW_KEY_ESCAPE;
+    GLuint bKey         = GLFW_KEY_B;
 };
 
 struct Text {
@@ -190,3 +192,5 @@ struct MenuOption{
     GLuint index;
     bool isSelected = false;
 }; 
+
+struct PauseMenu{};

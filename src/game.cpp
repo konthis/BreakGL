@@ -66,7 +66,7 @@ void Game::init(){
         sig.set(ecs_org.getComponentType<Collider>());
         ecs_org.setSystemSignature<CollisionSystem>(sig);
     }
-    mCollisionSystem->init(glm::vec4{0,mWidth,0,mHeight});
+    mCollisionSystem->init(glm::vec4{0,WINDOW_WIDTH,0,WINDOW_HEIGHT});
 
 
     mRenderSystem = ecs_org.createSystem<RenderSystem>();
@@ -76,7 +76,7 @@ void Game::init(){
         sig.set(ecs_org.getComponentType<Renderable>());
         ecs_org.setSystemSignature<RenderSystem>(sig);
     }
-    mRenderSystem->init(mWidth,mHeight);
+    mRenderSystem->init(WINDOW_WIDTH,WINDOW_HEIGHT);
 
     mTextRenderSystem = ecs_org.createSystem<TextRenderSystem>();
     {
@@ -96,7 +96,7 @@ void Game::init(){
     mMenuInputSystem->init();
     mPhysicsSystem->init();
     mMeshGenSystem->init();
-    mTextRenderSystem->init(mWidth, mHeight, mTextShader.get(), 40);
+    mTextRenderSystem->init(WINDOW_WIDTH, WINDOW_HEIGHT, mTextShader.get(), 40);
 
     setGameState(GameState::MainMenu);
 }
@@ -104,11 +104,10 @@ void Game::init(){
 void Game::run(){ 
 
     float currTime = 0.f;
+    float frameDt;
     float currFPS{};
     unsigned int countForFPS = 0;
-
-    std::set<Entity> toDestroy; // for multiple balls -> multiple squuare deletions
-    std::set<unsigned int> toCreate{}; // powerup
+    unsigned int time = 0;
 
     while(!mWindow.shouldClose()){
         mWindow.pollEvents();
@@ -116,7 +115,8 @@ void Game::run(){
         switch(mState){
             case GameState::Playing:{
                 currTime = (float)glfwGetTime();
-                mTimeAccumulator += currTime - mLastTime;
+                frameDt = currTime - mLastTime;
+                mTimeAccumulator += frameDt;
                 currFPS += (1.0f/(currTime-mLastTime))/30.0f;
                 mLastTime = currTime;
                 countForFPS++;
@@ -125,7 +125,19 @@ void Game::run(){
                     auto & t = ecs_org.getComponent<Text>(eFPS);
                     t.content = std::to_string((int)currFPS);
                     currFPS = 0;
+                    
+                } 
+
+                mTimerAccumulator += frameDt;
+                if(mTimerAccumulator >= 1.0f){
+                    mTimerAccumulator -= 1.0f;
+                    // fires once per second
+                    time++;
+                    auto & t = ecs_org.getComponent<Text>(eTimer);
+                    t.content = std::to_string(time);
                 }
+
+ 
 
                 mInputSystem->update(keyPressed);
 
@@ -133,30 +145,44 @@ void Game::run(){
                     mPhysicsSystem->update(mDT);
                     mTimeAccumulator -= mDT;
                 }
-                mCollisionSystem->update(toDestroy, toCreate);
-                // 
-                for (auto& e: toCreate) {
-                    auto const& sig = ecs_org.getSignature(e);
-                   if(sig.test(ecs_org.getComponentType<Ball>()))
-                    mBallCount++;
-                    auto& pos = ecs_org.getComponent<Position>(e);
+                mCollisionSystem->update(mCr);
+
+                for (auto i : mCr.ballsToSpawn){
+
+                    Entity e = createBall(ecs_org, mBallShader.get(),
+                    i.position,
+                    i.velocity
+                    );
                     mMeshGenSystem->initEntity(e);
+                    mBallCount++;
                 }
-                for (auto e : toDestroy){
+                for (auto e : mCr.toDestroy){
                     auto const& sig = ecs_org.getSignature(e);
                     if(sig.test(ecs_org.getComponentType<Ball>())){
                         mBallCount--;
                     }
                     ecs_org.destroyEntity(e);
                 }
+                auto& pl = ecs_org.getComponent<Platform>(mPlatformEntity);
+                if (mCr.widePlatform) {
+                    pl.wideTimer = PLATFORM_WIDE_TIMER;
+                    pl.bigSide = PLATFORM_SIDE_BIG_POWERUP;
+                    mMeshGenSystem->initEntity(mPlatformEntity);
+                } else if (pl.wideTimer > 0.f) {
+                    pl.wideTimer -= frameDt;
+                    if (pl.wideTimer <= 0.f) {
+                        pl.bigSide = PLATFORM_SIDE_BIG;
+                        mMeshGenSystem->initEntity(mPlatformEntity);
+                    }
+                }
                 if(!mBallCount){
                     setGameState(GameState::GameOver);
                 }
 
 
-
-                toDestroy.clear();
-                toCreate.clear();
+                mCr.toDestroy.clear();
+                mCr.ballsToSpawn.clear();
+                mCr.widePlatform = false;
 
                 mRenderSystem->update();
                 mTextRenderSystem->update();
@@ -233,6 +259,10 @@ void Game::run(){
                 else if (confirmed == 1){
                     setGameState(GameState::MainMenu);
                 }
+                else if (confirmed == 2){
+                    kill();
+                    exit(0);
+                }
                 break;
             }
 
@@ -249,9 +279,10 @@ void Game::run(){
 
             }
 
-            case GameState::Win:
+            case GameState::Win:{
                 mState = GameState::Playing;
                 break;
+            }
         }
         
         mWindow.swapBuffers();
@@ -273,9 +304,15 @@ void Game::setGameState(GameState newState) {
 
                 glm::vec4{0.0f,1.0f,0.0f,1.0f},
                 0.5f,
-                glm::vec2{50.0f, WINDOW_HEIGHT-HUD_HEIGHT+25.0f}
+                glm::vec2{WINDOW_WIDTH - 50.0f, WINDOW_HEIGHT-HUD_HEIGHT+25.0f}
             );
-            loadScene(ecs_org, mBallShader.get(),mPlatformShader.get(), mSimpleShader.get(),mGameScene);
+            // timer
+            eTimer = createText(ecs_org,"0",
+                glm::vec4{0.0f,1.0f,0.0f,1.0f},
+                0.5f,
+                glm::vec2{80.0f, WINDOW_HEIGHT-HUD_HEIGHT+25.0f}
+            );
+            loadScene(ecs_org, mBallShader.get(),mPlatformShader.get(), mSimpleShader.get(),mGameScene, mPlatformEntity);
             mBallCount++;
             mMeshGenSystem->init();
             break;

@@ -78,7 +78,7 @@ Entity createSquare(ECSOrganizer& ecs, Shader* squareShader, glm::vec2 pos, Powe
     }
     else if(power == PowerUp::LONGER_PLATFORM){
         ecs.addComponent<Renderable>(e, Renderable{ squareShader, 
-            .color = SQUARE_COLOR_RED 
+            .color = SQUARE_COLOR_GREEN 
         });
 
     }
@@ -114,7 +114,7 @@ Entity createSquareHollow(ECSOrganizer& ecs, Shader* squareShader, glm::vec2 pos
     }
     else if(power == PowerUp::LONGER_PLATFORM){
         ecs.addComponent<Renderable>(e, Renderable{ squareShader, 
-            .color = SQUARE_COLOR_RED,
+            .color = SQUARE_COLOR_GREEN,
             .hidden = true 
         });
 

@@ -4,6 +4,7 @@
 #include "shader.hpp"
 #include <unordered_map>
 #include <memory>
+#include <set>
 #define GLM_ENABLE_EXPERIMENTAL // enables the to_string
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
@@ -128,6 +129,18 @@ class ComponentManager{
 
 };
 
+// store collision results
+struct BallSpawn {
+    glm::vec2 position;
+    glm::vec2 velocity;
+};
+
+struct CollisionResult {
+    std::set<Entity> toDestroy;
+    std::vector<BallSpawn> ballsToSpawn;
+    bool widePlatform = false;
+};
+
 
 // COMPONENTS
 
@@ -147,6 +160,7 @@ struct Square{
 struct Platform{
     GLfloat smallSide;
     GLfloat bigSide;
+    GLfloat wideTimer = 0.f;
 };
 
 struct Position{

@@ -16,7 +16,7 @@ const std::vector<std::string> pattern1 = {
     "XX..XXXXXXXXXXXXXXX..XXXXXXXXXXXXXX..XX",
     "OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO",
     "OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO",
-    "OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO",
+    "PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP",
 };
 // };const std::vector<std::string> pattern1 = {
 //     "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
@@ -63,7 +63,7 @@ void buildLayout(ECSOrganizer& ecs, const std::vector<std::string>& pattern, Sha
 // for choose scene preview
 void buildLayoutPreview(ECSOrganizer& ecs,const GLuint sceneIdx, Shader *squareShader);
 
-void loadScene(ECSOrganizer& ecs, Shader *ballShader, Shader *platformShader, Shader *squareShader, GameScene gameScene);
+void loadScene(ECSOrganizer& ecs, Shader *ballShader, Shader *platformShader, Shader *squareShader, GameScene gameScene, Entity &platform);
 
 void loadMainMenuScene(ECSOrganizer& ecs, Shader *textShader);
 

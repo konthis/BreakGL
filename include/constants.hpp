@@ -6,6 +6,7 @@ constexpr glm::vec4 COLOR_WHITE                 = {1.0f,1.0f,1.0f,1.0f};
 constexpr glm::vec4 COLOR_GREEN                 = {0.0f,1.0f,0.0f,1.0f};
 constexpr glm::vec4 SQUARE_COLOR_RED            = {0.75f,0.0f,0.0f,1.0f};
 constexpr glm::vec4 SQUARE_COLOR_YELLOW         = {0.75f,0.75f,0.0f,1.0f};
+constexpr glm::vec4 SQUARE_COLOR_GREEN          = {0.0f,0.6f,0.0f,1.0f};
 constexpr glm::vec4 MENU_SELECTED_TEXT_COLOR    = {0.035f, 0.522f, 0.0f, 1.0f};
 constexpr glm::vec4 MENU_TEXT_COLOR             = {0.345, 0.0, 0.431, 1.0};
 
@@ -17,8 +18,11 @@ constexpr float BALL_RADIUS         = 8.0f;
 constexpr float BALL_ABS_SPEED      = 350.0f;
 constexpr float PLATFORM_SIDE_SMALL = 10.0f;
 constexpr float PLATFORM_SIDE_BIG   = 100.0f;
+constexpr float PLATFORM_SIDE_BIG_POWERUP = 200.0f;
 constexpr float SQUARE_SIDE         = 18.0f;
 constexpr float SQUARE_GAP          = 2.0f;
+
+constexpr float PLATFORM_WIDE_TIMER = 5.0f;
 
 enum PowerUp {
     EMPTY,

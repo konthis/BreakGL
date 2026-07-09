@@ -178,7 +178,7 @@ class CollisionSystem: public System{
             }
         }
 
-        void checkEntityCollisions(Entity e1, Entity e2, std::set<Entity>& toDestroy, unsigned int &toCreate){
+        void checkEntityCollisions(Entity e1, Entity e2, std::set<Entity>& toDestroy, unsigned int &toCreate, bool &widePlatform){
             auto& posE1 = ecs_org.getComponent<Position>(e1);
             auto &rbE1 = ecs_org.getComponent<RigidBody>(e1);
             auto& posE2 = ecs_org.getComponent<Position>(e2);
@@ -308,6 +308,9 @@ class CollisionSystem: public System{
                         toCreate++;
                         //
                     }
+                    if(sq.power == PowerUp::LONGER_PLATFORM){
+                        widePlatform = true;
+                    }
                 }
             }
         }
@@ -319,7 +322,7 @@ class CollisionSystem: public System{
         mWorldDims = worldDims;
     }
 
-    void update(std::set<Entity>&toDestroy, std::set<Entity> &toCreate){
+    void update(CollisionResult &cr){
         for (auto const& entity : mEntities) {
             auto const& sig = ecs_org.getSignature(entity);
             // PLATFORM COLLISION (ONLY WITH WALLS NOW)
@@ -345,7 +348,7 @@ class CollisionSystem: public System{
                 if(pos.position.y < - 2.0f*BALL_RADIUS){
                     // delete ball if out of bottom
                     // ecs_org.destroyEntity(entity);
-                    toDestroy.insert(entity);
+                    cr.toDestroy.insert(entity);
                     return;
                 }
                 glm::vec4 edgeCasesForShape = {
@@ -358,7 +361,7 @@ class CollisionSystem: public System{
                 unsigned int toCreateNum = 0;
                 for (auto const& entity2 : mEntities){
                     if(entity != entity2){
-                        checkEntityCollisions(entity, entity2, toDestroy, toCreateNum);
+                        checkEntityCollisions(entity, entity2, cr.toDestroy, toCreateNum,cr.widePlatform);
                         if(toCreateNum) break; // only 1 detroy per frame PER BALL
                     }
                 }
@@ -366,10 +369,10 @@ class CollisionSystem: public System{
                     auto &rend = ecs_org.getComponent<Renderable>(entity);
 
                     for (int i = 0; i < toCreateNum; i++){
-                        toCreate.insert(createBall(ecs_org, rend.shader,
-                        glm::vec2{pos.position.x, WINDOW_HEIGHT/5.0f},
-                        glm::vec2{-rb.velocity.x, glm::abs(rb.velocity.y)}
-                        ));
+                        cr.ballsToSpawn.push_back(BallSpawn{
+                            .position = glm::vec2{pos.position.x, WINDOW_HEIGHT/5.0f},
+                            .velocity = glm::vec2{-rb.velocity.x, glm::abs(rb.velocity.y)}
+                        });
                     }
                 }
             }

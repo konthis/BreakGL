@@ -1,12 +1,12 @@
 #include "scenes.hpp"
 
-void loadScene(ECSOrganizer& ecs, Shader *ballShader, Shader *platformShader, Shader *squareShader, GameScene gameScene){
+void loadScene(ECSOrganizer& ecs, Shader *ballShader, Shader *platformShader, Shader *squareShader, GameScene gameScene, Entity &platform){
     std::mt19937 rng(1337);
     std::uniform_real_distribution<float> col(0.f, 1.f);
     std::uniform_real_distribution<float> ballVelDirAngleRNG(glm::pi<float>()/3.0f, 5.0f * glm::pi<float>()/6.0f);
 
     // platform
-    createPlatform(ecs,platformShader,
+    platform = createPlatform(ecs,platformShader,
         glm::vec2{WINDOW_WIDTH/2.0f, PLATFORM_SIDE_SMALL/2.0f}
     );
     //
@@ -38,8 +38,13 @@ void loadScene(ECSOrganizer& ecs, Shader *ballShader, Shader *platformShader, Sh
 
     // text
     createText(ecs, "FPS: ",COLOR_GREEN,0.5f,
-        glm::vec2{0.0f, WINDOW_HEIGHT-HUD_HEIGHT+25.0f}
+        glm::vec2{WINDOW_WIDTH - 100.0f, WINDOW_HEIGHT-HUD_HEIGHT+25.0f}
     );
+
+    createText(ecs, "TIMER: ",COLOR_GREEN,0.5f,
+        glm::vec2{10.0f, WINDOW_HEIGHT-HUD_HEIGHT+25.0f}
+    );
+
     //
 
 
@@ -122,6 +127,12 @@ void buildLayout(ECSOrganizer& ecs, const std::vector<std::string>& pattern, Sha
                     PowerUp::SUMMON_BALL
                 );
             }
+            else if(c == 'P'){
+                glm::vec2 pos = start + glm::vec2(col * (SQUARE_SIDE+ SQUARE_GAP), -row * (SQUARE_SIDE + SQUARE_GAP)); 
+                createSquare(ecs, squareShader, pos,
+                    PowerUp::LONGER_PLATFORM
+                );
+            }
             else if (c == 'X'){
                 glm::vec2 pos = start + glm::vec2(col * (SQUARE_SIDE+ SQUARE_GAP), -row * (SQUARE_SIDE + SQUARE_GAP)); 
                 createSquare(ecs, squareShader, pos,
@@ -190,7 +201,7 @@ void loadPausedScene(ECSOrganizer &ecs,Shader *textShader){
         .centered = true,
     });
     ecs.addComponent<Position>(e, Position{ 
-        .position = glm::vec2{WINDOW_WIDTH/2.0f,2.0f*WINDOW_HEIGHT/5.0f}
+        .position = glm::vec2{WINDOW_WIDTH/2.0f,3.0f*WINDOW_HEIGHT/5.0f}
     });
     ecs.addComponent<PauseMenu>(e,PauseMenu{});
 
@@ -201,6 +212,22 @@ void loadPausedScene(ECSOrganizer &ecs,Shader *textShader){
     });
     ecs.addComponent<Text>(e,Text{
         .content = "Main Menu",
+        .color = MENU_TEXT_COLOR,
+        .scale = 1.0f,
+        .centered = true,
+    });
+    ecs.addComponent<Position>(e, Position{ 
+        .position = glm::vec2{WINDOW_WIDTH/2.0f,2.0f*WINDOW_HEIGHT/5.0f}
+    });
+    ecs.addComponent<PauseMenu>(e,PauseMenu{});
+
+    e = ecs.createEntity();
+    ecs.addComponent<MenuOption>(e, MenuOption{
+        .index = 2,
+        .isSelected = false
+    });
+    ecs.addComponent<Text>(e,Text{
+        .content = "Quit",
         .color = MENU_TEXT_COLOR,
         .scale = 1.0f,
         .centered = true,
@@ -282,6 +309,12 @@ void buildLayoutPreview(ECSOrganizer& ecs, const GLuint sceneIdx, Shader *square
                 glm::vec2 pos = start + glm::vec2(col * (SQUARE_SIDE+ SQUARE_GAP), -row * (SQUARE_SIDE + SQUARE_GAP)); 
                 createSquareHollow(ecs, squareShader, pos, 
                     PowerUp::EMPTY, sceneIdx
+                );
+            }
+            else if(c == 'P'){
+                glm::vec2 pos = start + glm::vec2(col * (SQUARE_SIDE+ SQUARE_GAP), -row * (SQUARE_SIDE + SQUARE_GAP)); 
+                createSquareHollow(ecs, squareShader, pos,
+                    PowerUp::LONGER_PLATFORM, sceneIdx
                 );
             }
         }

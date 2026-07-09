@@ -19,6 +19,7 @@ void Game::init(){
     ecs_org.createComponent<Ball>();
     ecs_org.createComponent<Text>();
     ecs_org.createComponent<Square>();
+    ecs_org.createComponent<Preview>();
     ecs_org.createComponent<Platform>();
     ecs_org.createComponent<Position>();
     ecs_org.createComponent<Collider>();
@@ -132,8 +133,15 @@ void Game::run(){
                     mPhysicsSystem->update(mDT);
                     mTimeAccumulator -= mDT;
                 }
-                mCollisionSystem->update(mState, toDestroy, toCreate);
+                mCollisionSystem->update(toDestroy, toCreate);
                 // 
+                for (auto& e: toCreate) {
+                    auto const& sig = ecs_org.getSignature(e);
+                   if(sig.test(ecs_org.getComponentType<Ball>()))
+                    mBallCount++;
+                    auto& pos = ecs_org.getComponent<Position>(e);
+                    mMeshGenSystem->initEntity(e);
+                }
                 for (auto e : toDestroy){
                     auto const& sig = ecs_org.getSignature(e);
                     if(sig.test(ecs_org.getComponentType<Ball>())){
@@ -145,13 +153,7 @@ void Game::run(){
                     setGameState(GameState::GameOver);
                 }
 
-                for (auto& e: toCreate) {
-                    auto const& sig = ecs_org.getSignature(e);
-                   if(sig.test(ecs_org.getComponentType<Ball>()))
-                    mBallCount++;
-                    auto& pos = ecs_org.getComponent<Position>(e);
-                    mMeshGenSystem->initEntity(e);
-                }
+
 
                 toDestroy.clear();
                 toCreate.clear();
@@ -164,19 +166,59 @@ void Game::run(){
                 }
                 break;
             }
+
             case GameState::MainMenu:{
-                int confirmed = mMenuInputSystem->update(keyPressed,mDT/2.0f);
+                int confirmed = mMenuInputSystem->update(keyPressed,mDT/3.0f, false);
                 mTextRenderSystem->update();
-                if (confirmed==1){
+                if (confirmed == 0){
+                    setGameState(GameState::ChooseSceneMenu);
+                }
+                else if (confirmed==1){
                     setGameState(GameState::Playing);
                 }
                 else if (confirmed == 3){
+                    kill();
                     exit(0);
                 }
                 break;
             }
+
+            case GameState::ChooseSceneMenu:{
+                int confirmed = mMenuInputSystem->update(keyPressed,mDT/3.0f, true);
+                mRenderSystem->update();  
+                mTextRenderSystem->update();
+                if(confirmed<0 && confirmed != mLastPreviewIdx){ // if just hover
+                    int currentSceneIdx = -confirmed - 1; // -1->0, -2->1, -3->2
+                    for (auto e : ecs_org.getEntitiesOfComponent<Preview>()) {
+                        auto& preview = ecs_org.getComponent<Preview>(e);
+                        auto& rend = ecs_org.getComponent<Renderable>(e);
+                        rend.hidden = (preview.sceneIdx != currentSceneIdx);
+                    }
+                    mLastPreviewIdx = confirmed;
+                }
+                else{
+                    if (confirmed == 0){
+                        mGameScene = GameScene::Scene1;
+                        setGameState(GameState::MainMenu);
+                    }
+                    else if (confirmed == 1){
+                        mGameScene = GameScene::Scene2;
+                        setGameState(GameState::MainMenu);
+                    }
+                    else if (confirmed == 2){
+                        mGameScene = GameScene::Scene3;
+                        setGameState(GameState::MainMenu);
+                    }
+
+                }
+                if(keyPressed==GLFW_KEY_ESCAPE){
+                    setGameState(GameState::MainMenu);
+                }
+                break;
+            }
+
             case GameState::Paused:{
-                int confirmed = mMenuInputSystem->update(keyPressed,mDT/2.0f);
+                int confirmed = mMenuInputSystem->update(keyPressed,mDT/2.0f, false);
                 mTextRenderSystem->update();
                 if (confirmed == 0){
                     // just continue, but still reset the times
@@ -193,8 +235,9 @@ void Game::run(){
                 }
                 break;
             }
+
             case GameState::GameOver:{
-                int confirmed = mMenuInputSystem->update(keyPressed,mDT/2.0f);
+                int confirmed = mMenuInputSystem->update(keyPressed,mDT/2.0f, false);
                 mTextRenderSystem->update();
                 if (confirmed==0){
                     setGameState(GameState::MainMenu);
@@ -205,6 +248,7 @@ void Game::run(){
                 break;
 
             }
+
             case GameState::Win:
                 mState = GameState::Playing;
                 break;
@@ -231,22 +275,37 @@ void Game::setGameState(GameState newState) {
                 0.5f,
                 glm::vec2{50.0f, WINDOW_HEIGHT-HUD_HEIGHT+25.0f}
             );
-            loadScene1(ecs_org, mBallShader.get(),mPlatformShader.get(), mSimpleShader.get(), glm::vec2{mWidth,mHeight}, mHUDheight);
+            loadScene(ecs_org, mBallShader.get(),mPlatformShader.get(), mSimpleShader.get(),mGameScene);
             mBallCount++;
             mMeshGenSystem->init();
             break;
         }    
         case GameState::MainMenu:{
+            mMenuInputSystem->reset();
             ecs_org.reset();
             glClear(GL_COLOR_BUFFER_BIT);
-            loadMainMenuScene(ecs_org, mTextShader.get(), glm::vec2{mWidth,mHeight});
+            loadMainMenuScene(ecs_org, mTextShader.get());
+            break;
+        }
+        case GameState::ChooseSceneMenu:{
+            mMenuInputSystem->reset();
+            ecs_org.reset();
+            mLastPreviewIdx = -99; // off number, it will init on 1st hover correctly
+            glClear(GL_COLOR_BUFFER_BIT);
+            loadChooseGameSceneScene(ecs_org, mTextShader.get());
+            buildLayoutPreview(ecs_org, 0, mSimpleShader.get());
+            buildLayoutPreview(ecs_org, 1, mSimpleShader.get());
+            buildLayoutPreview(ecs_org, 2, mSimpleShader.get());
+            mMeshGenSystem->init();
             break;
         }
         case GameState::Paused:{
+            mMenuInputSystem->reset();
             loadPausedScene(ecs_org, mTextShader.get());
             break;
         }
         case GameState::GameOver:{
+            mMenuInputSystem->reset();
             ecs_org.reset();
             loadGameOverScene(ecs_org,mTextShader.get());
             break;

@@ -7,17 +7,29 @@
 #include <glm/gtc/constants.hpp>
 
 const std::vector<std::string> pattern1 = {
-    "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-    "XXXXXXXXXXXXXXXXXXX..XXXXXXXXXXXXXXXXXX",
+    "OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO",
+    "OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO",
     "XX..XXXOXXXXXXXXXXX..XXXXXXXXXXOXXX..XX",
     "XX..XXXXXXXXXXXXXXX..XXXXXXXXXXXXXX..XX",
     "XXXXXXXXXXXXXXXXXXX..XXXXXXXXXXXXXXXXXX",
     "XXXXXXXXXXXXXXXXXXX..XXXXXXXXXXXXXXXXXX",
     "XX..XXXXXXXXXXXXXXX..XXXXXXXXXXXXXX..XX",
-    "XX..XXXXXXXXXXXXXXX..XXXXXXXXXXXXXX..XX",
-    "XXXXXXXXXXXXXXXXXXX..XXXXXXXXXXXXXXXXXX",
-    // "OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO",
+    "OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO",
+    "OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO",
+    "OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO",
 };
+// };const std::vector<std::string> pattern1 = {
+//     "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+//     "XXXXXXXXXXXXXXXXXXX..XXXXXXXXXXXXXXXXXX",
+//     "XX..XXXOXXXXXXXXXXX..XXXXXXXXXXOXXX..XX",
+//     "XX..XXXXXXXXXXXXXXX..XXXXXXXXXXXXXX..XX",
+//     "XXXXXXXXXXXXXXXXXXX..XXXXXXXXXXXXXXXXXX",
+//     "XXXXXXXXXXXXXXXXXXX..XXXXXXXXXXXXXXXXXX",
+//     "XX..XXXXXXXXXXXXXXX..XXXXXXXXXXXXXX..XX",
+//     "XX..XXXXXXXXXXXXXXX..XXXXXXXXXXXXXX..XX",
+//     "XXXXXXXXXXXXXXXXXXX..XXXXXXXXXXXXXXXXXX",
+//     "OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO",
+// };
 
 const std::vector<std::string> pattern2 = {
     "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
@@ -32,13 +44,31 @@ const std::vector<std::string> pattern2 = {
     "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
 };
 
+const std::vector<std::string> pattern3 = {
+    "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+    "XX..XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX..XX",
+    "XXXXOXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXOXXXX",
+    "XXXXXXXXXXXXXXXXXX....XXXXXXXXXXXXXXXXXX",
+    "XXXX...XXXXXXXXXXXXXXXXXXXXXXXXXX...XXXX",
+    "XXXXXXXXOXXXXXXXXXXXXXXXXXXXXXXOXXXXXXXX",
+    "XXX....XXXXXXXXXXXXXXXXXXXXXXXXXX....XXX",
+    "..XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX..",
+    "XOXXXXXXXXXXXXXXXX....XXXXXXXXXXXXXXXXOX",
+    "XXXX..XXXXXXXX..XXXXXXXX..XXXXXXXX..XXXX",
+};
+
+
 void buildLayout(ECSOrganizer& ecs, const std::vector<std::string>& pattern, Shader *squareShader);
 
+// for choose scene preview
+void buildLayoutPreview(ECSOrganizer& ecs,const GLuint sceneIdx, Shader *squareShader);
 
-void loadScene1(ECSOrganizer& ecs, Shader *ballShader, Shader *platformShader, Shader *squareShader, glm::vec2 windowSize, GLuint HUDheight);
+void loadScene(ECSOrganizer& ecs, Shader *ballShader, Shader *platformShader, Shader *squareShader, GameScene gameScene);
 
-void loadMainMenuScene(ECSOrganizer& ecs, Shader *textShader, glm::vec2 windowSize);
+void loadMainMenuScene(ECSOrganizer& ecs, Shader *textShader);
 
 void loadGameOverScene(ECSOrganizer &ecs,Shader *textShader);
 
 void loadPausedScene(ECSOrganizer &ecs,Shader *textShader);
+
+void loadChooseGameSceneScene(ECSOrganizer &ecs,Shader *textShader);

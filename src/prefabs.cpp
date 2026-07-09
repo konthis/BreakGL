@@ -91,3 +91,41 @@ Entity createSquare(ECSOrganizer& ecs, Shader* squareShader, glm::vec2 pos, Powe
 
     return e;
 }
+
+Entity createSquareHollow(ECSOrganizer& ecs, Shader* squareShader, glm::vec2 pos, PowerUp power, const GLuint sceneIdx){
+    Entity e = ecs.createEntity();
+    ecs.addComponent<Position>(e, Position{ 
+        .position = pos
+    });
+    ecs.addComponent<Square>(e, Square{ 
+        .side = SQUARE_SIDE,
+        .power = power
+    });
+    ecs.addComponent<Preview>(e, Preview{
+        .sceneIdx = sceneIdx
+    });
+
+    if(power == PowerUp::SUMMON_BALL){
+        ecs.addComponent<Renderable>(e, Renderable{ squareShader, 
+            .color = SQUARE_COLOR_YELLOW,
+            .hidden = true 
+        });
+
+    }
+    else if(power == PowerUp::LONGER_PLATFORM){
+        ecs.addComponent<Renderable>(e, Renderable{ squareShader, 
+            .color = SQUARE_COLOR_RED,
+            .hidden = true 
+        });
+
+    }
+    else{
+        ecs.addComponent<Renderable>(e, Renderable{ squareShader, 
+            .color = SQUARE_COLOR_RED, 
+            .hidden = true 
+        });
+
+    }
+
+    return e;
+}

@@ -3,7 +3,6 @@
 #include "ECSorganizer.hpp"
 #include "components.hpp"
 #include "shader.hpp"
-#include "game_state.hpp"
 #include "text.hpp"
 #include "constants.hpp"
 #include "prefabs.hpp"
@@ -131,6 +130,8 @@ class RenderSystem: public System{
             for (auto const& entity : mEntities){
 
                 auto& rend = ecs_org.getComponent<Renderable>(entity);
+                if(rend.hidden){ continue;}
+
                 auto& pos = ecs_org.getComponent<Position>(entity);
                 rend.modelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(pos.position, 0.0f));
 
@@ -198,7 +199,7 @@ class CollisionSystem: public System{
                 distance = glm::length(delta);
                 minDistance = radE1 + radE2;
 
-                if(distance < minDistance){
+                if(distance < minDistance && distance > 0.f){
                     glm::vec2 n = delta / distance; //normal vector
                     
                     // push them
@@ -207,12 +208,17 @@ class CollisionSystem: public System{
                     posE2.position += n * overlap * 0.5f;
 
                     // THIS COMMEND PART IS FOR NORMAL VELOCITY CHANGE, IM BREAKOUT, WE HAVE FIXED VELOCITIES
+                    float speed1 = glm::length(rbE1.velocity);
+                    float speed2 = glm::length(rbE2.velocity);
                     // update velocities on the norm
-                    // float dvn = glm::dot(rbE1.velocity - rbE2.velocity, n);
-                    // if (dvn > 0.f) {  // only resolve if moving toward each other
-                    //     rbE1.velocity -= dvn * n;
-                    //     rbE2.velocity += dvn * n;
-                    // }
+                    float dvn = glm::dot(rbE1.velocity - rbE2.velocity, n);
+                    if (dvn > 0.f) {  // only resolve if moving toward each other
+                        rbE1.velocity -= dvn * n;
+                        rbE2.velocity += dvn * n;
+                        if(glm::length(rbE1.velocity) > 0.f) rbE1.velocity = glm::normalize(rbE1.velocity) * speed1;
+                        if(glm::length(rbE2.velocity) > 0.f) rbE2.velocity = glm::normalize(rbE2.velocity) * speed2;
+
+                    }
                 }
             }
 
@@ -287,7 +293,7 @@ class CollisionSystem: public System{
                 glm::vec2 diff = ballPosition.position - contactPoint;
                 distance = glm::length(diff); 
 
-                if (distance <= rad) { // if collision
+                if (distance <= rad && distance > 0.f) { // if collision
                     glm::vec2 normal = glm::normalize(diff);
                     ballPosition.position += normal * (rad - distance);
                 
@@ -313,8 +319,8 @@ class CollisionSystem: public System{
         mWorldDims = worldDims;
     }
 
-    void update(GameState &gstate, std::set<Entity>&toDestroy, std::set<Entity> &toCreate){
-        for (auto const& entity : mEntities){
+    void update(std::set<Entity>&toDestroy, std::set<Entity> &toCreate){
+        for (auto const& entity : mEntities) {
             auto const& sig = ecs_org.getSignature(entity);
             // PLATFORM COLLISION (ONLY WITH WALLS NOW)
             if(sig.test(ecs_org.getComponentType<Platform>())){
@@ -361,8 +367,8 @@ class CollisionSystem: public System{
 
                     for (int i = 0; i < toCreateNum; i++){
                         toCreate.insert(createBall(ecs_org, rend.shader,
-                        glm::vec2{WINDOW_WIDTH/2.0f,WINDOW_HEIGHT/7.0f},
-                        -rb.velocity
+                        glm::vec2{pos.position.x, WINDOW_HEIGHT/5.0f},
+                        glm::vec2{-rb.velocity.x, glm::abs(rb.velocity.y)}
                         ));
                     }
                 }
@@ -490,17 +496,19 @@ class MenuInputSystem: public System{
         float mKeyHeldTime = 0.0f;
         const float KEY_REPEAT = 0.15f; // seconds between moves while held
 
-        bool handleKey(GLuint &key){
+        bool handleKey(GLuint &key, bool horizontal){
             GLuint maxOpts = (GLuint)mEntities.size();
-            if(key == GLFW_KEY_UP){
+            if(key == GLFW_KEY_UP && !horizontal){
                 mSelectedIdx = mSelectedIdx>0?mSelectedIdx-1:0;
             }
-            if(key == GLFW_KEY_DOWN){
+            if(key == GLFW_KEY_DOWN && !horizontal){
                 mSelectedIdx = mSelectedIdx<maxOpts-1?mSelectedIdx+1:maxOpts- 1;
             }
-            if(key == GLFW_KEY_RIGHT){
+            if(key == GLFW_KEY_RIGHT && horizontal){
+                mSelectedIdx = mSelectedIdx<maxOpts-1?mSelectedIdx+1:maxOpts- 1;
             }
-            if(key == GLFW_KEY_LEFT){
+            if(key == GLFW_KEY_LEFT && horizontal){
+                mSelectedIdx = mSelectedIdx>0?mSelectedIdx-1:0;
             }
             if(key == GLFW_KEY_ENTER){
                 return true;
@@ -524,27 +532,36 @@ class MenuInputSystem: public System{
             }
         }
     }
-    int update(GLuint &key, float dt) {
-        bool enterPressed = false;
+    int update(GLuint &key, float dt, bool horizontal) {
+
+        bool enterPressed;
         if (key != mPrevKey) { // new press
-            enterPressed = handleKey(key);
+            enterPressed = handleKey(key, horizontal);
             mKeyHeldTime = 0.0f;
         } 
-        else if (key != GLFW_KEY_UNKNOWN) {  // held
+        else if (key != GLFW_KEY_UNKNOWN && key != GLFW_KEY_ENTER) {  // held
             mKeyHeldTime += dt;
             if (mKeyHeldTime >= KEY_REPEAT) {
-                enterPressed = handleKey(key);
+                enterPressed = handleKey(key, horizontal);
                 mKeyHeldTime = 0.0f;
             }
         }
         mPrevKey = key;
+        // IF ENTER PRESSED, RETURN THE SELECTED IDX
         if(enterPressed){
             return mSelectedIdx;
         }
+        // ELSE RETURN THE NEGATIVE - 1, TO CALCULATE HOVERED OPTIONS
         else{
-            return -1;
+            return -mSelectedIdx-1;
         }
     }
+
+    void reset() {
+        mSelectedIdx = 0;
+        mKeyHeldTime = 0.0f;
+    }
+
 
 
 };

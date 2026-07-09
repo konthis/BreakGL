@@ -1,9 +1,9 @@
 #pragma once
+#include "constants.hpp"
 #include "window.hpp"
 #include "shader.hpp"
 #include "systems.hpp"
 #include "scenes.hpp"
-#include "game_state.hpp"
 #include "text.hpp"
 
 
@@ -34,6 +34,9 @@ class Game{
         float mTimeAccumulator{};
         // balls
         GLuint mBallCount = 0;
+        // scene
+        GameScene mGameScene = GameScene::Scene1;
+        int mLastPreviewIdx;
 
 
         void setGameState(GameState newState);

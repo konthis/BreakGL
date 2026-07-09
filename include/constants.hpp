@@ -14,7 +14,7 @@ constexpr GLuint WINDOW_HEIGHT  = 600;
 constexpr GLuint WINDOW_WIDTH   = 800;
 
 constexpr float BALL_RADIUS         = 8.0f;
-constexpr float BALL_ABS_SPEED      = 300.0f;
+constexpr float BALL_ABS_SPEED      = 350.0f;
 constexpr float PLATFORM_SIDE_SMALL = 10.0f;
 constexpr float PLATFORM_SIDE_BIG   = 100.0f;
 constexpr float SQUARE_SIDE         = 18.0f;
@@ -25,3 +25,19 @@ enum PowerUp {
     SUMMON_BALL,
     LONGER_PLATFORM,
  };
+
+
+enum GameState {
+    MainMenu, 
+    ChooseSceneMenu, 
+    Playing, 
+    Paused, 
+    GameOver, 
+    Win 
+};
+
+enum GameScene{
+    Scene1,
+    Scene2,
+    Scene3
+};

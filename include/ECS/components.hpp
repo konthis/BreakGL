@@ -2,7 +2,6 @@
 #include "constants.hpp"
 #include "entities.hpp"
 #include "shader.hpp"
-#include "game_state.hpp"
 #include <unordered_map>
 #include <memory>
 #define GLM_ENABLE_EXPERIMENTAL // enables the to_string
@@ -169,6 +168,7 @@ struct Renderable {
     glm::vec4 color;
     glm::mat4 modelMatrix{1.0f};
     GLfloat indexCount{}; // how many edges to make the object (ex. square = 6, 2 triangles)
+    bool hidden = false; // for preloading but no rendering
 
 };
 
@@ -194,3 +194,7 @@ struct MenuOption{
 }; 
 
 struct PauseMenu{};
+
+struct Preview{
+    GLuint sceneIdx; // scene ownership
+};

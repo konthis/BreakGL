@@ -18,6 +18,8 @@ add_executable(${PROJECT_NAME}
                         src/window.cpp
                         src/scenes.cpp
                         src/prefabs.cpp
+                        src/miniaudio.c
+                        src/audio_manager.cpp
                         )
 
 

@@ -46,8 +46,6 @@ void loadScene(ECSOrganizer& ecs, Shader *ballShader, Shader *platformShader, Sh
     );
 
     //
-
-
 }
 
 
@@ -186,7 +184,6 @@ void loadGameOverScene(ECSOrganizer &ecs,Shader *textShader){
     });
 }
 
-
 void loadPausedScene(ECSOrganizer &ecs,Shader *textShader){
 
     Entity e = ecs.createEntity();
@@ -238,6 +235,52 @@ void loadPausedScene(ECSOrganizer &ecs,Shader *textShader){
     ecs.addComponent<PauseMenu>(e,PauseMenu{});
 }
 
+void loadWinningScene(ECSOrganizer &ecs,Shader *textShader){
+    Entity e = ecs.createEntity();
+    ecs.addComponent<Text>(e,Text{
+        .content = "YOU WON!",
+        .color = MENU_SELECTED_TEXT_COLOR,
+        .scale = 3.0f,
+        .centered = true,
+    });
+    ecs.addComponent<Position>(e, Position{ 
+        .position = glm::vec2{WINDOW_WIDTH/2.0f,3.0f*WINDOW_HEIGHT/5.0f}
+    });
+    ecs.addComponent<PauseMenu>(e,PauseMenu{});
+
+    e = ecs.createEntity();
+    ecs.addComponent<MenuOption>(e, MenuOption{
+        .index = 0,
+        .isSelected = false
+    });
+    ecs.addComponent<Text>(e,Text{
+        .content = "Main Menu",
+        .color = MENU_TEXT_COLOR,
+        .scale = 1.0f,
+        .centered = true,
+    });
+    ecs.addComponent<Position>(e, Position{ 
+        .position = glm::vec2{WINDOW_WIDTH/2.0f,2.0f*WINDOW_HEIGHT/5.0f}
+    });
+    ecs.addComponent<PauseMenu>(e,PauseMenu{});
+
+    e = ecs.createEntity();
+    ecs.addComponent<MenuOption>(e, MenuOption{
+        .index = 1,
+        .isSelected = false
+    });
+    ecs.addComponent<Text>(e,Text{
+        .content = "Quit",
+        .color = MENU_TEXT_COLOR,
+        .scale = 1.0f,
+        .centered = true,
+    });
+    ecs.addComponent<Position>(e, Position{ 
+        .position = glm::vec2{WINDOW_WIDTH/2.0f,WINDOW_HEIGHT/5.0f}
+    });
+    ecs.addComponent<PauseMenu>(e,PauseMenu{});
+
+}
 
 void loadChooseGameSceneScene(ECSOrganizer &ecs,Shader *textShader){
     Entity e = ecs.createEntity();

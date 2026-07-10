@@ -24,6 +24,14 @@ constexpr float SQUARE_GAP          = 2.0f;
 
 constexpr float PLATFORM_WIDE_TIMER = 5.0f;
 
+constexpr char * MUSIC_SCENE_1      = "audio/Next_to_you.wav";
+constexpr char * MUSIC_SCENE_2      = "audio/Next_to_you.wav";
+constexpr char * MUSIC_SCENE_3      = "audio/Next_to_you.wav";
+constexpr char * MUSIC_WIN          = "audio/Next_to_you.wav";
+constexpr char * SFX_BOUNCE         = "audio/Next_to_you.wav";
+constexpr char * SFX_SPAWN_BALL     = "audio/Next_to_you.wav";
+constexpr char * SFX_WIDE_PLATFORM  = "audio/Next_to_you.wav";
+
 enum PowerUp {
     EMPTY,
     SUMMON_BALL,

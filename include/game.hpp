@@ -5,6 +5,7 @@
 #include "systems.hpp"
 #include "scenes.hpp"
 #include "text.hpp"
+#include "audio_manager.hpp"
 
 
 class Game{
@@ -26,6 +27,8 @@ class Game{
         std::shared_ptr<RenderSystem>    mRenderSystem;
         std::shared_ptr<TextRenderSystem> mTextRenderSystem;
         std::shared_ptr<MenuInputSystem> mMenuInputSystem;
+        // audio
+        AudioManager mAudioManager;
         // collision results
         CollisionResult mCr;
         // FPS entity
@@ -36,10 +39,11 @@ class Game{
         float mLastTime{};
         float mTimeAccumulator{};
         // balls
-        GLuint mBallCount = 0;
+        GLuint mBallCount{};
         // platform
         Entity mPlatformEntity;
-        // Platform mPlatformComp;
+        // square
+        GLuint mSquareCount{};
         // scene
         GameScene mGameScene = GameScene::Scene1;
         int mLastPreviewIdx;

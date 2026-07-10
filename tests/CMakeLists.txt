@@ -10,12 +10,14 @@ find_package(Freetype REQUIRED)
 
 
 add_executable(${PROJECT_NAME} 
-                        game_test.cpp
-                        ../include/glad/glad.c
-                        ../src/shader.cpp
-                        ../src/game.cpp
-                        ../src/window.cpp
-                        ../src/scenes.cpp
+                        audio_test.c
+                        # ../include/glad/glad.c
+                        # ../src/shader.cpp
+                        # ../src/game.cpp
+                        # ../src/window.cpp
+                        # ../src/scenes.cpp
+                        # ../src/prefabs.cpp
+                        ../src/miniaudio.c
                         )
 
 

@@ -161,7 +161,13 @@ void Game::run(){
                     if(sig.test(ecs_org.getComponentType<Ball>())){
                         mBallCount--;
                     }
+                    else if(sig.test(ecs_org.getComponentType<Square>())){
+                        mSquareCount--;
+                    }
                     ecs_org.destroyEntity(e);
+                }
+                if(!mSquareCount){
+                    setGameState(GameState::Win);
                 }
                 auto& pl = ecs_org.getComponent<Platform>(mPlatformEntity);
                 if (mCr.widePlatform) {
@@ -280,7 +286,15 @@ void Game::run(){
             }
 
             case GameState::Win:{
-                mState = GameState::Playing;
+                int confirmed = mMenuInputSystem->update(keyPressed,mDT/2.0f, false);
+                mTextRenderSystem->update();
+                if (confirmed == 0){
+                    setGameState(GameState::MainMenu);
+                }
+                else if (confirmed == 1){
+                    kill();
+                    exit(0);
+                }
                 break;
             }
         }
@@ -299,6 +313,17 @@ void Game::setGameState(GameState newState) {
         case GameState::Playing:{
             ecs_org.reset();
             mBallCount = 0;
+            mSquareCount = 0;
+            // audio
+            if(mGameScene == GameScene::Scene1){
+                mAudioManager.playMusic(MUSIC_SCENE_1);
+            }
+            else if(mGameScene == GameScene::Scene2){
+                mAudioManager.playMusic(MUSIC_SCENE_2);
+            }
+            else if(mGameScene == GameScene::Scene3){
+                mAudioManager.playMusic(MUSIC_SCENE_3);
+            }
             // FPS ENTITY
             eFPS = createText(ecs_org,"",
 
@@ -314,10 +339,14 @@ void Game::setGameState(GameState newState) {
             );
             loadScene(ecs_org, mBallShader.get(),mPlatformShader.get(), mSimpleShader.get(),mGameScene, mPlatformEntity);
             mBallCount++;
+            for(auto &e:ecs_org.getEntitiesOfComponent<Square>()){
+                mSquareCount++;
+            }
             mMeshGenSystem->init();
             break;
         }    
         case GameState::MainMenu:{
+            mAudioManager.stopMusic();
             mMenuInputSystem->reset();
             ecs_org.reset();
             glClear(GL_COLOR_BUFFER_BIT);
@@ -325,6 +354,7 @@ void Game::setGameState(GameState newState) {
             break;
         }
         case GameState::ChooseSceneMenu:{
+            mAudioManager.stopMusic();
             mMenuInputSystem->reset();
             ecs_org.reset();
             mLastPreviewIdx = -99; // off number, it will init on 1st hover correctly
@@ -348,6 +378,9 @@ void Game::setGameState(GameState newState) {
             break;
         }
         case GameState::Win:{
+            mAudioManager.stopMusic();
+            mMenuInputSystem->reset();
+            loadWinningScene(ecs_org, mTextShader.get());
             break;
         }
     }

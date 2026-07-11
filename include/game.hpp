@@ -29,6 +29,9 @@ class Game{
         std::shared_ptr<MenuInputSystem> mMenuInputSystem;
         // audio
         AudioManager mAudioManager;
+        bool mMenuMusicPlaying = false;
+        float mMusicVol = 0.3f;
+        float mSfxVol = 0.3f;
         // collision results
         CollisionResult mCr;
         // FPS entity

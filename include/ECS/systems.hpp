@@ -159,7 +159,8 @@ class CollisionSystem: public System{
 
     private:
         glm::vec4 mWorldDims;
-        void checkWallCollisions(Position &pos, RigidBody &rb,glm::vec4 &edgeCasesForShape, bool isPlatform){
+        bool checkWallCollisions(Position &pos, RigidBody &rb,glm::vec4 &edgeCasesForShape, bool isPlatform){
+            bool collided = false;
             if (pos.position.y <= edgeCasesForShape[2] && isPlatform) {
                 pos.position.y = edgeCasesForShape[2];
                 rb.velocity.y = glm::abs(rb.velocity.y);
@@ -167,18 +168,26 @@ class CollisionSystem: public System{
             if (pos.position.y >= edgeCasesForShape[3]) {
                 pos.position.y = edgeCasesForShape[3];
                 rb.velocity.y = -glm::abs(rb.velocity.y);
+                collided = true;
             }
             if (pos.position.x <= edgeCasesForShape[0]) {
                 pos.position.x = edgeCasesForShape[0];
                 rb.velocity.x = glm::abs(rb.velocity.x); 
+                collided = true;
             }
             if (pos.position.x >= edgeCasesForShape[1]) {
                 pos.position.x = edgeCasesForShape[1];
                 rb.velocity.x = -glm::abs(rb.velocity.x);
+                collided = true;
             }
+            if(collided){
+                return true;
+            } 
+            return false;
         }
 
-        void checkEntityCollisions(Entity e1, Entity e2, std::set<Entity>& toDestroy, unsigned int &toCreate, bool &widePlatform){
+        bool checkEntityCollisions(Entity e1, Entity e2, std::set<Entity>& toDestroy, unsigned int &toCreate, bool &widePlatform){
+            bool collided = false;
             auto& posE1 = ecs_org.getComponent<Position>(e1);
             auto &rbE1 = ecs_org.getComponent<RigidBody>(e1);
             auto& posE2 = ecs_org.getComponent<Position>(e2);
@@ -217,7 +226,7 @@ class CollisionSystem: public System{
                         rbE2.velocity += dvn * n;
                         if(glm::length(rbE1.velocity) > 0.f) rbE1.velocity = glm::normalize(rbE1.velocity) * speed1;
                         if(glm::length(rbE2.velocity) > 0.f) rbE2.velocity = glm::normalize(rbE2.velocity) * speed2;
-
+                        return true;
                     }
                 }
             }
@@ -265,10 +274,9 @@ class CollisionSystem: public System{
                         } else {  // sides pure reflection
                             ballRB.velocity -= 2.f * dvn * normal;
                         }
+                        return true;
                     }
                 }
-
-
             }
 
             // ball x square collision
@@ -308,11 +316,13 @@ class CollisionSystem: public System{
                         toCreate++;
                         //
                     }
-                    if(sq.power == PowerUp::LONGER_PLATFORM){
+                    else if(sq.power == PowerUp::LONGER_PLATFORM){
                         widePlatform = true;
                     }
+                    return true;
                 }
             }
+            return false;
         }
 
     public:
@@ -355,16 +365,18 @@ class CollisionSystem: public System{
                     radius_seconds, mWorldDims[1] - radius_seconds,radius_seconds, mWorldDims[3] - radius_seconds
                 };
 
-                checkWallCollisions(pos,rb,edgeCasesForShape,
-                    sig.test(ecs_org.getComponentType<Platform>()));
+                cr.ballHit |= checkWallCollisions(pos,rb,edgeCasesForShape, sig.test(ecs_org.getComponentType<Platform>()));
 
                 unsigned int toCreateNum = 0;
+                bool collided = false;
                 for (auto const& entity2 : mEntities){
                     if(entity != entity2){
-                        checkEntityCollisions(entity, entity2, cr.toDestroy, toCreateNum,cr.widePlatform);
+                        collided |= checkEntityCollisions(entity, entity2, cr.toDestroy, toCreateNum,cr.widePlatform);
                         if(toCreateNum) break; // only 1 detroy per frame PER BALL
                     }
                 }
+                cr.ballHit |= collided;
+                if(cr.widePlatform){ cr.ballHitWidePlatSquare = true;}
                 if(toCreateNum){
                     auto &rend = ecs_org.getComponent<Renderable>(entity);
 
@@ -374,6 +386,7 @@ class CollisionSystem: public System{
                             .velocity = glm::vec2{-rb.velocity.x, glm::abs(rb.velocity.y)}
                         });
                     }
+                    cr.ballHitSpawnBallSquare = true;
                 }
             }
         }
@@ -455,6 +468,7 @@ class TextRenderSystem: public System{
                 // iterate through all characters
                 std::string::const_iterator c;
                 float x = text.centered?pos.position.x-getTextWidth(characters,text.content,text.scale)/2.0f:pos.position.x;
+                x = text.rightAligned?pos.position.x-getTextWidth(characters,text.content,text.scale):x;
                 float y = pos.position.y;
                 for (c = text.content.begin(); c != text.content.end(); c++){
                     Character ch = characters.at(*c);
@@ -499,18 +513,30 @@ class MenuInputSystem: public System{
         float mKeyHeldTime = 0.0f;
         const float KEY_REPEAT = 0.15f; // seconds between moves while held
 
-        bool handleKey(GLuint &key, bool horizontal){
+        int handleKey(GLuint &key, MenuType menuType){
             GLuint maxOpts = (GLuint)mEntities.size();
-            if(key == GLFW_KEY_UP && !horizontal){
+            if(menuType == MenuType::SelectAndBar){
+                if(key == GLFW_KEY_RIGHT) return 1;   
+                if(key == GLFW_KEY_LEFT)  return -1;  
+                if(key == GLFW_KEY_UP){
+                    mSelectedIdx = mSelectedIdx>0?mSelectedIdx-1:0;
+                }
+                if(key == GLFW_KEY_DOWN){
+                    mSelectedIdx = mSelectedIdx<maxOpts-1?mSelectedIdx+1:maxOpts- 1;
+                }
+                if(key == GLFW_KEY_ENTER) return 2; // confirm  
+            }
+
+            if(key == GLFW_KEY_UP && menuType==MenuType::Vertical){
                 mSelectedIdx = mSelectedIdx>0?mSelectedIdx-1:0;
             }
-            if(key == GLFW_KEY_DOWN && !horizontal){
+            if(key == GLFW_KEY_DOWN && menuType==MenuType::Vertical){
                 mSelectedIdx = mSelectedIdx<maxOpts-1?mSelectedIdx+1:maxOpts- 1;
             }
-            if(key == GLFW_KEY_RIGHT && horizontal){
+            if(key == GLFW_KEY_RIGHT && menuType==MenuType::Horizontal){
                 mSelectedIdx = mSelectedIdx<maxOpts-1?mSelectedIdx+1:maxOpts- 1;
             }
-            if(key == GLFW_KEY_LEFT && horizontal){
+            if(key == GLFW_KEY_LEFT && menuType==MenuType::Horizontal){
                 mSelectedIdx = mSelectedIdx>0?mSelectedIdx-1:0;
             }
             if(key == GLFW_KEY_ENTER){
@@ -535,17 +561,27 @@ class MenuInputSystem: public System{
             }
         }
     }
-    int update(GLuint &key, float dt, bool horizontal) {
+    int update(GLuint &key, float dt, MenuType menuType) {
 
-        bool enterPressed;
+        if(menuType == MenuType::SelectAndBar){
+            if(key != mPrevKey){
+                int action = handleKey(key, menuType);
+                mPrevKey = key;
+                return action; 
+            }
+            mPrevKey = key;
+            return 0;
+        }
+
+        bool enterPressed = false;
         if (key != mPrevKey) { // new press
-            enterPressed = handleKey(key, horizontal);
+            enterPressed = handleKey(key, menuType);
             mKeyHeldTime = 0.0f;
         } 
         else if (key != GLFW_KEY_UNKNOWN && key != GLFW_KEY_ENTER) {  // held
             mKeyHeldTime += dt;
             if (mKeyHeldTime >= KEY_REPEAT) {
-                enterPressed = handleKey(key, horizontal);
+                enterPressed = handleKey(key, menuType);
                 mKeyHeldTime = 0.0f;
             }
         }
@@ -560,9 +596,13 @@ class MenuInputSystem: public System{
         }
     }
 
+    int getSelectedIdx(){ return mSelectedIdx;}
+
     void reset() {
         mSelectedIdx = 0;
         mKeyHeldTime = 0.0f;
+        mPrevKey = GLFW_KEY_ENTER;
+
     }
 
 

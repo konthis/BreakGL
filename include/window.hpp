@@ -18,6 +18,8 @@ class Window{
 
     bool shouldClose();
 
+    void close();
+
     void swapBuffers();
 
     void pollEvents();

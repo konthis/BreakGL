@@ -7,9 +7,9 @@
 #include <glm/gtc/constants.hpp>
 
 const std::vector<std::string> pattern1 = {
-    "OOOOOOOOOOOOOOOOOOOOOOOOOOOOO",
+    "OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO",
 };
-//// const std::vector<std::string> pattern1 = {
+// const std::vector<std::string> pattern1 = {
 //     "OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO",
 //     "OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO",
 //     "XX..XXXOXXXXXXXXXXX..XXXXXXXXXXOXXX..XX",
@@ -19,7 +19,7 @@ const std::vector<std::string> pattern1 = {
 //     "XX..XXXXXXXXXXXXXXX..XXXXXXXXXXXXXX..XX",
 //     "OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO",
 //     "OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO",
-//     "PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP",
+//     "POPOPOPOOPOPOPPOPOPOPOPOOOOPOPPOPPPPOPO",
 // };
 // };const std::vector<std::string> pattern1 = {
 //     "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
@@ -77,3 +77,5 @@ void loadPausedScene(ECSOrganizer &ecs,Shader *textShader);
 void loadWinningScene(ECSOrganizer &ecs,Shader *textShader);
 
 void loadChooseGameSceneScene(ECSOrganizer &ecs,Shader *textShader);
+
+void loadSettingsScene(ECSOrganizer &ecs,Shader *textShader, Shader *squareShader);

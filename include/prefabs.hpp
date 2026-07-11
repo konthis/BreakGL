@@ -13,3 +13,5 @@ Entity createText(ECSOrganizer& ecs, const std::string content, glm::vec4 color,
 
 Entity createSquareHollow(ECSOrganizer& ecs, Shader* squareShader, glm::vec2 pos, PowerUp power, const GLuint sceneIdx);
 
+Entity createSquareVol(ECSOrganizer& ecs, Shader* squareShader, glm::vec2 pos, BarType barType, float size);
+

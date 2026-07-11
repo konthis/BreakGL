@@ -86,7 +86,6 @@ Entity createSquare(ECSOrganizer& ecs, Shader* squareShader, glm::vec2 pos, Powe
         ecs.addComponent<Renderable>(e, Renderable{ squareShader, 
             .color = SQUARE_COLOR_RED 
         });
-
     }
 
     return e;
@@ -126,6 +125,30 @@ Entity createSquareHollow(ECSOrganizer& ecs, Shader* squareShader, glm::vec2 pos
         });
 
     }
+
+    return e;
+}
+
+Entity createSquareVol(ECSOrganizer& ecs, Shader* squareShader, glm::vec2 pos, BarType barType, float size){
+    Entity e = ecs.createEntity();
+    ecs.addComponent<Position>(e, Position{ 
+        .position = pos
+    });
+    ecs.addComponent<Square>(e, Square{ 
+        .side = SQUARE_SIDE,
+    });
+
+    ecs.addComponent<Renderable>(e, Renderable{ squareShader, 
+        .color = SQUARE_COLOR_GREEN, 
+        .hidden = true 
+    });
+
+    ecs.addComponent<VolBar>(e, VolBar{
+        .size = size,
+        .type = barType
+    });
+
+
 
     return e;
 }

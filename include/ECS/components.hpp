@@ -139,8 +139,11 @@ struct CollisionResult {
     std::set<Entity> toDestroy;
     std::vector<BallSpawn> ballsToSpawn;
     bool widePlatform = false;
-};
+    bool ballHit = false;
+    bool ballHitSpawnBallSquare = false;
+    bool ballHitWidePlatSquare = false;
 
+};
 
 // COMPONENTS
 
@@ -200,6 +203,7 @@ struct Text {
     glm::vec4 color;
     GLfloat scale;
     bool centered = false;
+    bool rightAligned = false;
 };
 
 struct MenuOption{
@@ -211,4 +215,9 @@ struct PauseMenu{};
 
 struct Preview{
     GLuint sceneIdx; // scene ownership
+};
+
+struct VolBar{
+    float size = 0.0f; // max 1, min 0
+    BarType type; // music, sfx ...
 };

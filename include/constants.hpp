@@ -24,13 +24,21 @@ constexpr float SQUARE_GAP          = 2.0f;
 
 constexpr float PLATFORM_WIDE_TIMER = 5.0f;
 
-constexpr char * MUSIC_SCENE_1      = "audio/Next_to_you.mp3";
-constexpr char * MUSIC_SCENE_2      = "audio/Next_to_you.mp3";
-constexpr char * MUSIC_SCENE_3      = "audio/Next_to_you.mp3";
-constexpr char * MUSIC_WIN          = "audio/Next_to_you.mp3";
-constexpr char * SFX_BOUNCE         = "audio/Next_to_you.mp3";
-constexpr char * SFX_SPAWN_BALL     = "audio/Next_to_you.mp3";
-constexpr char * SFX_WIDE_PLATFORM  = "audio/Next_to_you.mp3";
+constexpr const char * MUSIC_SCENE_MENU     = "audio/Next_to_you.mp3";
+constexpr const char * MUSIC_SCENE_1        = "audio/slow-travel.mp3";
+constexpr const char * MUSIC_SCENE_2        = "audio/Heroic_Intrusion.mp3";
+constexpr const char * MUSIC_SCENE_3        = "audio/Interplanetary_Odyssey.mp3";
+constexpr const char * MUSIC_WIN            = "audio/win.mp3";
+constexpr const char * MUSIC_LOSE           = "audio/lose.mp3";
+constexpr const char * SFX_TEST             = "audio/sfxtest.wav";
+constexpr const char * SFX_BOUNCE           = "audio/bounce.wav";
+constexpr const char * SFX_SPAWN_BALL       = "audio/ballspawn.wav";
+constexpr const char * SFX_WIDE_PLATFORM    = "audio/wideplatform.wav";
+
+constexpr const unsigned int SFX_BOUNCE_ID          = 0;
+constexpr const unsigned int SFX_SPAWN_BALL_ID      = 1;
+constexpr const unsigned int SFX_WIDE_PLATFORM_ID   = 2;
+constexpr const unsigned int SFX_TEST_ID            = 3;
 
 enum PowerUp {
     EMPTY,
@@ -44,6 +52,7 @@ enum GameState {
     ChooseSceneMenu, 
     Playing, 
     Paused, 
+    Settings,
     GameOver, 
     Win 
 };
@@ -52,4 +61,15 @@ enum GameScene{
     Scene1,
     Scene2,
     Scene3
+};
+
+enum MenuType { 
+    Vertical, 
+    Horizontal, 
+    SelectAndBar,
+};
+
+enum BarType{
+    Music,
+    Sfx
 };

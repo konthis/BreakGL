@@ -138,15 +138,18 @@ class RenderSystem: public System{
                 rend.shader->activate();
 
                 Signature sig = ecs_org.getSignature(entity);
-                if (sig.test(ecs_org.getComponentType<Ball>())){
-                    rend.shader->setUniform<float>("uRadius",BALL_RADIUS);
+
+                if(sig.test(ecs_org.getComponentType<Platform>())){
+                    auto& plat = ecs_org.getComponent<Platform>(entity);
+                    rend.shader->setUniform<float>("u_platformBigSide",plat.bigSide);
                 }
 
-                rend.shader->setUniform<glm::mat4>("uModel",rend.modelMatrix);
+                rend.shader->setUniform<glm::mat4>("u_model",rend.modelMatrix);
+                rend.shader->setUniform<glm::vec2>("u_resolution",glm::vec2(WINDOW_WIDTH,WINDOW_HEIGHT));
 
-                rend.shader->setUniform<glm::mat4>("uProjection",mProjection);
-                rend.shader->setUniform<glm::vec4>("uColor",rend.color);
-                rend.shader->setUniform<float>("uTime",(float)glfwGetTime());
+                rend.shader->setUniform<glm::mat4>("u_projection",mProjection);
+                rend.shader->setUniform<glm::vec4>("u_color",rend.color);
+                rend.shader->setUniform<float>("u_time",(float)glfwGetTime());
 
                 glBindVertexArray(rend.VAO);
                 glDrawElements(GL_TRIANGLES, rend.indexCount, GL_UNSIGNED_INT, 0);
@@ -460,8 +463,9 @@ class TextRenderSystem: public System{
                 // position is middle left of the text
                 auto& pos = ecs_org.getComponent<Position>(entity);
                 mTextShader->activate();
-                mTextShader->setUniform<glm::vec4>("uTextColor",text.color);
-                mTextShader->setUniform<glm::mat4>("uProjection", mProjection);
+                mTextShader->setUniform<glm::vec4>("u_textColor",text.color);
+                mTextShader->setUniform<glm::mat4>("u_projection", mProjection);
+                mTextShader->setUniform<float>("u_time", (float)glfwGetTime());
                 glActiveTexture(GL_TEXTURE0);
                 glBindVertexArray(mVAO);
                 const auto& characters = mTR.getCharacters();

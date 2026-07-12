@@ -16,9 +16,10 @@ class Game{
         const float mDT      = 1/240.f;
         // shaders
         std::unique_ptr<Shader> mBallShader;
-        std::unique_ptr<Shader> mSimpleShader;
+        std::unique_ptr<Shader> mSquareShader;
         std::unique_ptr<Shader> mPlatformShader;
         std::unique_ptr<Shader> mTextShader;
+        std::unique_ptr<Shader> mBackgroundShader;
         // systems
         std::shared_ptr<MeshGenSystem>   mMeshGenSystem;
         std::shared_ptr<PhysicsSystem>   mPhysicsSystem;

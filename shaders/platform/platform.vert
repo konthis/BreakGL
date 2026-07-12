@@ -1,15 +1,15 @@
 #version 330 core
 // for ratio
-uniform mat4 uProjection;
-uniform mat4 uModel;
+uniform mat4 u_projection;
+uniform mat4 u_model;
 //
 
-layout (location = 0) in vec3 aPos;
+layout (location = 0) in vec3 a_pos;
 
-out vec3 vPos;
+out vec3 v_pos;
 
 void main()
 {
-    vPos = aPos;
-    gl_Position = uProjection * uModel * vec4(aPos, 1.0);
+    v_pos = a_pos;
+    gl_Position = u_projection * u_model * vec4(a_pos, 1.0);
 }

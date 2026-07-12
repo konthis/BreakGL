@@ -5,13 +5,15 @@ ECSOrganizer ecs_org;
 void Game::init(){
     mWindow.init(WINDOW_WIDTH, WINDOW_HEIGHT, "BreakGL");
     // mWindow.init(mWidth, mHeight, "BreakGL");
-    mSimpleShader = std::make_unique<Shader>(SHADER_DIR "/simple/simple.vert", SHADER_DIR "/simple/simple.frag");
+    mSquareShader = std::make_unique<Shader>(SHADER_DIR "/square/square.vert", SHADER_DIR "/square/square.frag");
 
     mBallShader = std::make_unique<Shader>(SHADER_DIR "/ball/ball.vert",SHADER_DIR "/ball/ball.frag");
 
     mPlatformShader = std::make_unique<Shader>(SHADER_DIR "/platform/platform.vert",SHADER_DIR "/platform/platform.frag");
 
     mTextShader = std::make_unique<Shader>(SHADER_DIR "/text/text.vert", SHADER_DIR "/text/text.frag");
+
+    mBackgroundShader = std::make_unique<Shader>(SHADER_DIR "/background/background.vert", SHADER_DIR "/background/background.frag");
 
     // COMPONENTS
     ecs_org.init();
@@ -249,8 +251,8 @@ void Game::run(){
                     else if(currentSceneIdx==2){
                         mAudioManager.playMusic(MUSIC_SCENE_3);
                     }
-
                     mAudioManager.setVolumes(mMusicVol,mSfxVol);
+
 
                     for (auto e : ecs_org.getEntitiesOfComponent<Preview>()) {
                         auto& preview = ecs_org.getComponent<Preview>(e);
@@ -395,8 +397,8 @@ void Game::setGameState(GameState newState) {
             else if(mGameScene == GameScene::Scene3){
                 mAudioManager.playMusic(MUSIC_SCENE_3);
             }
-
             mAudioManager.setVolumes(mMusicVol,mSfxVol);
+
             // FPS ENTITY
             eFPS = createText(ecs_org,"",
 
@@ -410,7 +412,7 @@ void Game::setGameState(GameState newState) {
                 0.5f,
                 glm::vec2{80.0f, WINDOW_HEIGHT-HUD_HEIGHT+25.0f}
             );
-            loadScene(ecs_org, mBallShader.get(),mPlatformShader.get(), mSimpleShader.get(),mGameScene, mPlatformEntity);
+            loadScene(ecs_org, mBallShader.get(),mPlatformShader.get(), mSquareShader.get(),mGameScene, mPlatformEntity);
             mBallCount++;
             for(auto &e:ecs_org.getEntitiesOfComponent<Square>()){
                 mSquareCount++;
@@ -437,9 +439,9 @@ void Game::setGameState(GameState newState) {
             mLastPreviewIdx = -99; // off number, it will init on 1st hover correctly
             glClear(GL_COLOR_BUFFER_BIT);
             loadChooseGameSceneScene(ecs_org, mTextShader.get());
-            buildLayoutPreview(ecs_org, 0, mSimpleShader.get());
-            buildLayoutPreview(ecs_org, 1, mSimpleShader.get());
-            buildLayoutPreview(ecs_org, 2, mSimpleShader.get());
+            buildLayoutPreview(ecs_org, 0, mSquareShader.get());
+            buildLayoutPreview(ecs_org, 1, mSquareShader.get());
+            buildLayoutPreview(ecs_org, 2, mSquareShader.get());
             mMeshGenSystem->init();
             break;
         }
@@ -452,7 +454,7 @@ void Game::setGameState(GameState newState) {
             mMenuInputSystem->reset();
             ecs_org.reset();
             glClear(GL_COLOR_BUFFER_BIT);
-            loadSettingsScene(ecs_org, mTextShader.get(),mSimpleShader.get());
+            loadSettingsScene(ecs_org, mTextShader.get(),mSquareShader.get());
             mMeshGenSystem->init();
             break;
         }

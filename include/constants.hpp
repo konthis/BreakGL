@@ -14,20 +14,20 @@ constexpr GLuint HUD_HEIGHT     = 50;
 constexpr GLuint WINDOW_HEIGHT  = 600;
 constexpr GLuint WINDOW_WIDTH   = 800;
 
-constexpr float BALL_RADIUS         = 8.0f;
+constexpr float BALL_RADIUS         = 6.0f;
 constexpr float BALL_ABS_SPEED      = 350.0f;
 constexpr float PLATFORM_SIDE_SMALL = 10.0f;
 constexpr float PLATFORM_SIDE_BIG   = 100.0f;
 constexpr float PLATFORM_SIDE_BIG_POWERUP = 200.0f;
-constexpr float SQUARE_SIDE         = 18.0f;
-constexpr float SQUARE_GAP          = 2.0f;
+constexpr float SQUARE_SIDE         = 20.0f;
+constexpr float SQUARE_GAP          = 0.0f;
 
 constexpr float PLATFORM_WIDE_TIMER = 5.0f;
 
 constexpr const char * MUSIC_SCENE_MENU     = "audio/Next_to_you.mp3";
-constexpr const char * MUSIC_SCENE_1        = "audio/slow-travel.mp3";
+constexpr const char * MUSIC_SCENE_1        = "audio/Interplanetary_Odyssey.mp3";
 constexpr const char * MUSIC_SCENE_2        = "audio/Heroic_Intrusion.mp3";
-constexpr const char * MUSIC_SCENE_3        = "audio/Interplanetary_Odyssey.mp3";
+constexpr const char * MUSIC_SCENE_3        = "audio/slow-travel.mp3";
 constexpr const char * MUSIC_WIN            = "audio/win.mp3";
 constexpr const char * MUSIC_LOSE           = "audio/lose.mp3";
 constexpr const char * SFX_TEST             = "audio/sfxtest.wav";

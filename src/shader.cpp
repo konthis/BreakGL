@@ -66,12 +66,13 @@ Shader::Shader(const char* vertPath, const char* fragPath)
     }
 
     // UNIFORM INITIALIZATIONS
-    setUniformLocation("uModel");
-    setUniformLocation("uProjection");
-    setUniformLocation("uColor");
-    setUniformLocation("uRadius");
-    setUniformLocation("uTime");
-    setUniformLocation("uTextColor");
+    setUniformLocation("u_model");
+    setUniformLocation("u_projection");
+    setUniformLocation("u_platformBigSide");
+    setUniformLocation("u_color");
+    setUniformLocation("u_time");
+    setUniformLocation("u_textColor");
+    setUniformLocation("u_resolution");
     //
 
     glDeleteShader(vert);

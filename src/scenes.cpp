@@ -429,3 +429,7 @@ void buildLayoutPreview(ECSOrganizer& ecs, const GLuint sceneIdx, Shader *square
         }
     }
 }
+
+void loadBackground(ECSOrganizer &ecs, Shader *backgroundShader){
+
+}

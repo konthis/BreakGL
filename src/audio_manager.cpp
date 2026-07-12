@@ -75,7 +75,7 @@ void AudioManager::playSFX(const unsigned int &sfx){
 }
 
 void AudioManager::setVolumes(float music, float sfx){
-    ma_sound_set_volume(&mMusic, music);
+    if(mMusicLoaded) ma_sound_set_volume(&mMusic, music);
     ma_sound_set_volume(&mSfxBounce, sfx);
     ma_sound_set_volume(&mSfxSpawnBall, sfx);
     ma_sound_set_volume(&mSfxWidePlatform, sfx);

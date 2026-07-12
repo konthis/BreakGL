@@ -221,3 +221,8 @@ struct VolBar{
     float size = 0.0f; // max 1, min 0
     BarType type; // music, sfx ...
 };
+
+struct Background{
+    float width;
+    float height;
+};

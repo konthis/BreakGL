@@ -28,6 +28,7 @@ void Game::init(){
     ecs_org.createComponent<Collider>();
     ecs_org.createComponent<RigidBody>();
     ecs_org.createComponent<PauseMenu>();
+    ecs_org.createComponent<Background>();
     ecs_org.createComponent<Renderable>();
     ecs_org.createComponent<MenuOption>();
     ecs_org.createComponent<PlayerInput>();
@@ -45,7 +46,6 @@ void Game::init(){
     {
         Signature sig;
         sig.set(ecs_org.getComponentType<Position>());
-        // sig.set(ecs_org.getComponentType<Gravity>());
         sig.set(ecs_org.getComponentType<RigidBody>());
         ecs_org.setSystemSignature<PhysicsSystem>(sig);
     }
@@ -208,6 +208,7 @@ void Game::run(){
                 mCr.toDestroy.clear();
                 mCr.ballsToSpawn.clear();
                 mCr.widePlatform = false;
+                mCr.ballHitWidePlatSquare = false;
 
                 mRenderSystem->update();
                 mTextRenderSystem->update();
@@ -259,6 +260,14 @@ void Game::run(){
                         auto& rend = ecs_org.getComponent<Renderable>(e);
                         rend.hidden = (preview.sceneIdx != currentSceneIdx);
                     }
+
+                    for(auto e : ecs_org.getEntitiesOfComponent<Background>()){
+                        auto& rend = ecs_org.getComponent<Renderable>(e);
+                        if(currentSceneIdx == 0) rend.color = BACKGROUND_DARK_PURPLE;
+                        else if(currentSceneIdx == 1) rend.color = BACKGROUND_DARK_NAVY;
+                        else rend.color = BACKGROUND_DARK_TEAL;
+                    }
+
                     mLastPreviewIdx = confirmed;
                 }
                 else{
@@ -293,14 +302,15 @@ void Game::run(){
                         ecs_org.destroyEntity(e);
                     }
                     mState = GameState::Playing;
-
                 }
                 else if (confirmed == 1){
                     setGameState(GameState::MainMenu);
                 }
                 else if (confirmed == 2){
-                    kill();
-                    exit(0);
+                    setGameState(GameState::MainMenu);
+                }
+                else if (confirmed == 3){
+                    mWindow.close();
                 }
                 break;
             }
@@ -412,7 +422,7 @@ void Game::setGameState(GameState newState) {
                 0.5f,
                 glm::vec2{80.0f, WINDOW_HEIGHT-HUD_HEIGHT+25.0f}
             );
-            loadScene(ecs_org, mBallShader.get(),mPlatformShader.get(), mSquareShader.get(),mGameScene, mPlatformEntity);
+            loadScene(ecs_org, mBallShader.get(),mPlatformShader.get(), mSquareShader.get(),mBackgroundShader.get(),mGameScene, mPlatformEntity);
             mBallCount++;
             for(auto &e:ecs_org.getEntitiesOfComponent<Square>()){
                 mSquareCount++;
@@ -429,7 +439,9 @@ void Game::setGameState(GameState newState) {
             mMenuInputSystem->reset();
             ecs_org.reset();
             glClear(GL_COLOR_BUFFER_BIT);
-            loadMainMenuScene(ecs_org, mTextShader.get());
+            loadMainMenuScene(ecs_org, mTextShader.get(), mBackgroundShader.get());
+            mMeshGenSystem->init();
+            mRenderSystem->update();  
             break;
         }
         case GameState::ChooseSceneMenu:{
@@ -438,7 +450,7 @@ void Game::setGameState(GameState newState) {
             mMenuMusicPlaying = false;
             mLastPreviewIdx = -99; // off number, it will init on 1st hover correctly
             glClear(GL_COLOR_BUFFER_BIT);
-            loadChooseGameSceneScene(ecs_org, mTextShader.get());
+            loadChooseGameSceneScene(ecs_org, mTextShader.get(), mBackgroundShader.get());
             buildLayoutPreview(ecs_org, 0, mSquareShader.get());
             buildLayoutPreview(ecs_org, 1, mSquareShader.get());
             buildLayoutPreview(ecs_org, 2, mSquareShader.get());
@@ -454,7 +466,7 @@ void Game::setGameState(GameState newState) {
             mMenuInputSystem->reset();
             ecs_org.reset();
             glClear(GL_COLOR_BUFFER_BIT);
-            loadSettingsScene(ecs_org, mTextShader.get(),mSquareShader.get());
+            loadSettingsScene(ecs_org, mTextShader.get(),mSquareShader.get(), mBackgroundShader.get());
             mMeshGenSystem->init();
             break;
         }
@@ -463,14 +475,14 @@ void Game::setGameState(GameState newState) {
             mAudioManager.setVolumes(mMusicVol,mSfxVol);
             mMenuInputSystem->reset();
             ecs_org.reset();
-            loadGameOverScene(ecs_org,mTextShader.get());
+            loadGameOverScene(ecs_org,mTextShader.get(),mBackgroundShader.get());
             break;
         }
         case GameState::Win:{
             mAudioManager.playMusic(MUSIC_WIN);
             mAudioManager.setVolumes(mMusicVol,mSfxVol);
             mMenuInputSystem->reset();
-            loadWinningScene(ecs_org, mTextShader.get());
+            loadWinningScene(ecs_org, mTextShader.get(), mBackgroundShader.get());
             break;
         }
     }

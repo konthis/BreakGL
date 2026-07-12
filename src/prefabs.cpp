@@ -147,8 +147,58 @@ Entity createSquareVol(ECSOrganizer& ecs, Shader* squareShader, glm::vec2 pos, B
         .size = size,
         .type = barType
     });
+    return e;
+}
 
+Entity createBackground(ECSOrganizer &ecs, Shader *backgroundShader, BackgroundType bType){
+    Entity e = ecs.createEntity();
+    ecs.addComponent<Position>(e, Position{ 
+        .position = {WINDOW_WIDTH/2.0f,WINDOW_HEIGHT/2.0f}
+    });    
+    
+    switch(bType){
+        case BackgroundType::SCENE_1:{
+            ecs.addComponent<Renderable>(e, Renderable{ backgroundShader, 
+                .color = BACKGROUND_DARK_PURPLE, 
+            });
+            break;
+        }
+        case BackgroundType::SCENE_2:{
+            ecs.addComponent<Renderable>(e, Renderable{ backgroundShader, 
+                .color = BACKGROUND_CHARCOAL, 
+            });
+            break;
+        }
+        case BackgroundType::SCENE_3:{
+            ecs.addComponent<Renderable>(e, Renderable{ backgroundShader, 
+                .color = BACKGROUND_DARK_TEAL, 
+            });
+            break;
+        }        
+        case BackgroundType::MAIN_MENU:{
+            ecs.addComponent<Renderable>(e, Renderable{ backgroundShader, 
+                .color = BACKGROUND_DARK_NAVY, 
+            });
 
+            break;
+        }
+        case BackgroundType::WIN:{
+            ecs.addComponent<Renderable>(e, Renderable{ backgroundShader, 
+                .color = BACKGROUND_GRAY, 
+            });
 
+            break;
+        }
+        case BackgroundType::LOSE:{
+            ecs.addComponent<Renderable>(e, Renderable{ backgroundShader, 
+                .color = BACKGROUND_GRAY, 
+            });
+            break;
+        }
+    }
+    ecs.addComponent<Background>(e,Background{
+        .width = WINDOW_WIDTH,
+        .height = WINDOW_HEIGHT
+    });
     return e;
 }

@@ -54,16 +54,19 @@ void buildLayout(ECSOrganizer& ecs, const std::vector<std::string>& pattern, Sha
 // for choose scene preview
 void buildLayoutPreview(ECSOrganizer& ecs,const GLuint sceneIdx, Shader *squareShader);
 
-void loadScene(ECSOrganizer& ecs, Shader *ballShader, Shader *platformShader, Shader *squareShader, GameScene gameScene, Entity &platform);
+void loadScene(ECSOrganizer& ecs, Shader *ballShader, Shader *platformShader, Shader *squareShader, Shader *backgroundShader, GameScene gameScene, Entity &platform);
 
-void loadMainMenuScene(ECSOrganizer& ecs, Shader *textShader);
+void loadMainMenuScene(ECSOrganizer& ecs, Shader *textShader, Shader *backgroundShader);
 
-void loadGameOverScene(ECSOrganizer &ecs,Shader *textShader);
+void loadGameOverScene(ECSOrganizer &ecs,Shader *textShader, Shader *backgroundShader);
 
 void loadPausedScene(ECSOrganizer &ecs,Shader *textShader);
 
-void loadWinningScene(ECSOrganizer &ecs,Shader *textShader);
+void loadWinningScene(ECSOrganizer &ecs,Shader *textShader, Shader *backgroundShader);
 
-void loadChooseGameSceneScene(ECSOrganizer &ecs,Shader *textShader);
+void loadChooseGameSceneScene(ECSOrganizer &ecs,Shader *textShader, Shader *backgroundShader);
 
-void loadSettingsScene(ECSOrganizer &ecs,Shader *textShader, Shader *squareShader);
+void loadSettingsScene(ECSOrganizer &ecs,Shader *textShader, Shader *squareShader, Shader *backgroundShader);
+
+void loadBackground(ECSOrganizer &ecs, Shader *backgroundShader, BackgroundType bType);
+

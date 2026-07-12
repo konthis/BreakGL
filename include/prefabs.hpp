@@ -15,3 +15,4 @@ Entity createSquareHollow(ECSOrganizer& ecs, Shader* squareShader, glm::vec2 pos
 
 Entity createSquareVol(ECSOrganizer& ecs, Shader* squareShader, glm::vec2 pos, BarType barType, float size);
 
+Entity createBackground(ECSOrganizer &ecs, Shader *backgroundShader, BackgroundType bType);

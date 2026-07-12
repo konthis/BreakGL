@@ -86,6 +86,17 @@ class MeshGenSystem: public System{
 
             indices = {0, 1, 2, 0, 2, 3};
         }
+        else if(sig.test(ecs_org.getComponentType<Background>())){
+            Background bg = ecs_org.getComponent<Background>(entity);
+            vertices = {
+                glm::vec3{-bg.width/2.f,  -bg.height/2.f, 0.f},
+                glm::vec3{ bg.width/2.f,  -bg.height/2.f, 0.f},
+                glm::vec3{ bg.width/2.f,   bg.height/2.f, 0.f},
+                glm::vec3{-bg.width/2.f,   bg.height/2.f, 0.f},
+            };
+            indices = {0, 1, 2, 0, 2, 3};
+        
+        }
 
         glGenVertexArrays(1,&VAO);
         glGenBuffers(1,&VBO);

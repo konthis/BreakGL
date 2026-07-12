@@ -1,10 +1,29 @@
 #include "scenes.hpp"
 
-void loadScene(ECSOrganizer& ecs, Shader *ballShader, Shader *platformShader, Shader *squareShader, GameScene gameScene, Entity &platform){
+void loadScene(ECSOrganizer& ecs, Shader *ballShader, Shader *platformShader, Shader *squareShader, Shader *backgroundShader, GameScene gameScene, Entity &platform){
     std::mt19937 rng(1337);
     std::uniform_real_distribution<float> col(0.f, 1.f);
     std::uniform_real_distribution<float> ballVelDirAngleRNG(glm::pi<float>()/3.0f, 5.0f * glm::pi<float>()/6.0f);
 
+    // squares & background
+    switch(gameScene){
+        case GameScene::Scene1:{
+            loadBackground(ecs,backgroundShader,BackgroundType::SCENE_1);
+            buildLayout(ecs,pattern1,squareShader);
+            break;
+        }
+        case GameScene::Scene2:{
+            loadBackground(ecs,backgroundShader,BackgroundType::SCENE_2);
+            buildLayout(ecs,pattern2,squareShader);
+            break;
+        }
+        case GameScene::Scene3:{
+            loadBackground(ecs,backgroundShader,BackgroundType::SCENE_3);
+            buildLayout(ecs,pattern3,squareShader);
+            break;
+        }
+    }
+    //
     // platform
     platform = createPlatform(ecs,platformShader,
         glm::vec2{WINDOW_WIDTH/2.0f, PLATFORM_SIDE_SMALL/2.0f}
@@ -19,22 +38,7 @@ void loadScene(ECSOrganizer& ecs, Shader *ballShader, Shader *platformShader, Sh
     );
     //
 
-    // squares
-    switch(gameScene){
-        case GameScene::Scene1:{
-            buildLayout(ecs,pattern1,squareShader);
-            break;
-        }
-        case GameScene::Scene2:{
-            buildLayout(ecs,pattern2,squareShader);
-            break;
-        }
-        case GameScene::Scene3:{
-            buildLayout(ecs,pattern3,squareShader);
-            break;
-        }
-    }
-    //
+
 
     // text
     createText(ecs, "FPS: ",COLOR_GREEN,0.5f,
@@ -49,8 +53,10 @@ void loadScene(ECSOrganizer& ecs, Shader *ballShader, Shader *platformShader, Sh
 }
 
 
-void loadMainMenuScene(ECSOrganizer& ecs, Shader *textShader){
+void loadMainMenuScene(ECSOrganizer& ecs, Shader *textShader, Shader *backgroundShader){
     
+
+    loadBackground(ecs,backgroundShader,BackgroundType::MAIN_MENU);
     Entity e = ecs.createEntity();
     ecs.addComponent<MenuOption>(e, MenuOption{
         .index = 0,
@@ -141,7 +147,8 @@ void buildLayout(ECSOrganizer& ecs, const std::vector<std::string>& pattern, Sha
     }
 }
 
-void loadGameOverScene(ECSOrganizer &ecs,Shader *textShader){
+void loadGameOverScene(ECSOrganizer &ecs,Shader *textShader, Shader *backgroundShader){
+    loadBackground(ecs,backgroundShader,BackgroundType::LOSE);
     Entity e = ecs.createEntity();
     ecs.addComponent<Text>(e,Text{
         .content = "GAME OVER",
@@ -198,7 +205,7 @@ void loadPausedScene(ECSOrganizer &ecs,Shader *textShader){
         .centered = true,
     });
     ecs.addComponent<Position>(e, Position{ 
-        .position = glm::vec2{WINDOW_WIDTH/2.0f,3.0f*WINDOW_HEIGHT/5.0f}
+        .position = glm::vec2{WINDOW_WIDTH/2.0f,4.0f*WINDOW_HEIGHT/6.0f}
     });
     ecs.addComponent<PauseMenu>(e,PauseMenu{});
 
@@ -208,13 +215,13 @@ void loadPausedScene(ECSOrganizer &ecs,Shader *textShader){
         .isSelected = false
     });
     ecs.addComponent<Text>(e,Text{
-        .content = "Main Menu",
+        .content = "Settings",
         .color = MENU_TEXT_COLOR,
         .scale = 1.0f,
         .centered = true,
     });
     ecs.addComponent<Position>(e, Position{ 
-        .position = glm::vec2{WINDOW_WIDTH/2.0f,2.0f*WINDOW_HEIGHT/5.0f}
+        .position = glm::vec2{WINDOW_WIDTH/2.0f,3.0f*WINDOW_HEIGHT/6.0f}
     });
     ecs.addComponent<PauseMenu>(e,PauseMenu{});
 
@@ -224,18 +231,35 @@ void loadPausedScene(ECSOrganizer &ecs,Shader *textShader){
         .isSelected = false
     });
     ecs.addComponent<Text>(e,Text{
+        .content = "Main Menu",
+        .color = MENU_TEXT_COLOR,
+        .scale = 1.0f,
+        .centered = true,
+    });
+    ecs.addComponent<Position>(e, Position{ 
+        .position = glm::vec2{WINDOW_WIDTH/2.0f,2.0f*WINDOW_HEIGHT/6.0f}
+    });
+    ecs.addComponent<PauseMenu>(e,PauseMenu{});
+
+    e = ecs.createEntity();
+    ecs.addComponent<MenuOption>(e, MenuOption{
+        .index = 3,
+        .isSelected = false
+    });
+    ecs.addComponent<Text>(e,Text{
         .content = "Quit",
         .color = MENU_TEXT_COLOR,
         .scale = 1.0f,
         .centered = true,
     });
     ecs.addComponent<Position>(e, Position{ 
-        .position = glm::vec2{WINDOW_WIDTH/2.0f,WINDOW_HEIGHT/5.0f}
+        .position = glm::vec2{WINDOW_WIDTH/2.0f,WINDOW_HEIGHT/6.0f}
     });
     ecs.addComponent<PauseMenu>(e,PauseMenu{});
 }
 
-void loadWinningScene(ECSOrganizer &ecs,Shader *textShader){
+void loadWinningScene(ECSOrganizer &ecs,Shader *textShader, Shader *backgroundShader){
+    loadBackground(ecs,backgroundShader,BackgroundType::WIN);
     Entity e = ecs.createEntity();
     ecs.addComponent<Text>(e,Text{
         .content = "YOU WON!",
@@ -282,7 +306,8 @@ void loadWinningScene(ECSOrganizer &ecs,Shader *textShader){
 
 }
 
-void loadChooseGameSceneScene(ECSOrganizer &ecs,Shader *textShader){
+void loadChooseGameSceneScene(ECSOrganizer &ecs, Shader *textShader, Shader *backgroundShader){
+    loadBackground(ecs,backgroundShader,BackgroundType::MAIN_MENU);
     Entity e = ecs.createEntity();
     ecs.addComponent<MenuOption>(e, MenuOption{
         .index = 0,
@@ -329,7 +354,8 @@ void loadChooseGameSceneScene(ECSOrganizer &ecs,Shader *textShader){
     });
 }
 
-void loadSettingsScene(ECSOrganizer &ecs,Shader *textShader, Shader *squareShader){
+void loadSettingsScene(ECSOrganizer &ecs,Shader *textShader, Shader *squareShader, Shader *backgroundShader){
+    loadBackground(ecs,backgroundShader,BackgroundType::MAIN_MENU);
     Entity e = ecs.createEntity();
     ecs.addComponent<MenuOption>(e, MenuOption{
         .index = 0,
@@ -430,6 +456,6 @@ void buildLayoutPreview(ECSOrganizer& ecs, const GLuint sceneIdx, Shader *square
     }
 }
 
-void loadBackground(ECSOrganizer &ecs, Shader *backgroundShader){
-
+void loadBackground(ECSOrganizer &ecs, Shader *backgroundShader, BackgroundType bType){
+    createBackground(ecs,backgroundShader, bType);
 }

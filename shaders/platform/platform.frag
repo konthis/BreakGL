@@ -27,6 +27,8 @@ void main()
     float pulse = pow(1.0-abs(sin(st.x-u_time)),6.0)/5.0;
     vec4 u_color = mix(vec4(0.65, 0.0, 1.0, 1.0), vec4(0.0, 0.45, 0.80, 1.0), t);
 
+    float frame = (1.0 - smoothstep(0.95,1.0,abs(st.x)))*(1.0-smoothstep(0.75,1.0,abs(st.y)));
+
     float line = mod(gl_FragCoord.y, 4.0) < 2.0 ? 0.95 : 1.0; 
-    FragColor = u_color*line+pulse;
+    FragColor = (u_color*line+pulse)*frame;
 }

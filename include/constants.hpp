@@ -4,6 +4,13 @@
 
 constexpr glm::vec4 COLOR_WHITE                 = {1.0f,1.0f,1.0f,1.0f};
 constexpr glm::vec4 COLOR_GREEN                 = {0.0f,1.0f,0.0f,1.0f};
+constexpr glm::vec4 BACKGROUND_GREEN            = {0.15, 0.45, 0.15, 0.8};
+constexpr glm::vec4 BACKGROUND_ORANGE           = {0.522, 0.325, 0.090, 1.0};
+constexpr glm::vec4 BACKGROUND_GRAY             = {0.3, 0.3, 0.3, 1.0};
+constexpr glm::vec4 BACKGROUND_DARK_NAVY        = {0.05, 0.05, 0.15, 1.0};
+constexpr glm::vec4 BACKGROUND_CHARCOAL         = {0.1, 0.1, 0.1, 1.0};
+constexpr glm::vec4 BACKGROUND_DARK_TEAL        = {0.02, 0.10, 0.12, 1.0};
+constexpr glm::vec4 BACKGROUND_DARK_PURPLE      = {0.05, 0.02, 0.10, 1.0};
 constexpr glm::vec4 SQUARE_COLOR_RED            = {0.75f,0.0f,0.0f,1.0f};
 constexpr glm::vec4 SQUARE_COLOR_YELLOW         = {0.75f,0.75f,0.0f,1.0f};
 constexpr glm::vec4 SQUARE_COLOR_GREEN          = {0.0f,0.6f,0.0f,1.0f};
@@ -72,4 +79,13 @@ enum MenuType {
 enum BarType{
     Music,
     Sfx
+};
+
+enum BackgroundType{
+    SCENE_1,
+    SCENE_2,
+    SCENE_3,
+    MAIN_MENU,
+    WIN,
+    LOSE
 };

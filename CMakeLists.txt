@@ -24,13 +24,21 @@ add_executable(${PROJECT_NAME}
 
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 target_compile_definitions(${PROJECT_NAME} PRIVATE
-    SHADER_DIR="${CMAKE_SOURCE_DIR}/shaders"
-    FONTS_DIR="${CMAKE_SOURCE_DIR}/fonts"
+    SHADER_DIR="shaders"
+    FONTS_DIR="fonts"
 )
 
-target_compile_options(${PROJECT_NAME} PRIVATE -fsanitize=address -g)
-target_link_options(${PROJECT_NAME} PRIVATE -fsanitize=address)
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_SOURCE_DIR}/shaders $<TARGET_FILE_DIR:${PROJECT_NAME}>/shaders
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_SOURCE_DIR}/fonts $<TARGET_FILE_DIR:${PROJECT_NAME}>/fonts
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_SOURCE_DIR}/audio $<TARGET_FILE_DIR:${PROJECT_NAME}>/audio
+)
+
 
 target_include_directories(${PROJECT_NAME} PRIVATE
                         include

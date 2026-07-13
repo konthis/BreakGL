@@ -224,6 +224,7 @@ void Game::run(){
 
             case GameState::MainMenu:{
                 int confirmed = mMenuInputSystem->update(keyPressed,mDT/3.0f, MenuType::Vertical);
+                mRenderSystem->update();
                 mTextRenderSystem->update();
                 if (confirmed == 0){
                     setGameState(GameState::ChooseSceneMenu);
@@ -428,6 +429,7 @@ void Game::run(){
             
             case GameState::GameOver:{
                 int confirmed = mMenuInputSystem->update(keyPressed,mDT/2.0f, MenuType::Vertical);
+                mRenderSystem->update();
                 mTextRenderSystem->update();
                 if (confirmed==0){
                     setGameState(GameState::MainMenu);
@@ -441,6 +443,7 @@ void Game::run(){
 
             case GameState::Win:{
                 int confirmed = mMenuInputSystem->update(keyPressed,mDT/2.0f, MenuType::Vertical);
+                mRenderSystem->update();
                 mTextRenderSystem->update();
                 if (confirmed == 0){
                     setGameState(GameState::MainMenu);
@@ -451,7 +454,6 @@ void Game::run(){
                 break;
             }
         }
-        
         mWindow.swapBuffers();
     }
 }

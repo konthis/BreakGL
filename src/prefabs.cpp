@@ -202,3 +202,19 @@ Entity createBackground(ECSOrganizer &ecs, Shader *backgroundShader, BackgroundT
     });
     return e;
 }
+
+Entity createOverlay(ECSOrganizer &ecs, Shader *backgroundShader){
+    Entity e = ecs.createEntity();
+    ecs.addComponent<Position>(e, Position{ 
+        .position = {WINDOW_WIDTH/2.0f,WINDOW_HEIGHT/2.0f}
+    });    
+    
+    ecs.addComponent<Renderable>(e, Renderable{ backgroundShader, 
+        .color = OVERLAY_ALPHA_MASK_MID, 
+    });
+    ecs.addComponent<Overlay>(e,Overlay{
+        .width = WINDOW_WIDTH,
+        .height = WINDOW_HEIGHT
+    });
+    return e;
+}

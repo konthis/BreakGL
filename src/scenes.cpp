@@ -52,7 +52,6 @@ void loadScene(ECSOrganizer& ecs, Shader *ballShader, Shader *platformShader, Sh
     //
 }
 
-
 void loadMainMenuScene(ECSOrganizer& ecs, Shader *textShader, Shader *backgroundShader){
     
 
@@ -191,8 +190,8 @@ void loadGameOverScene(ECSOrganizer &ecs,Shader *textShader, Shader *backgroundS
     });
 }
 
-void loadPausedScene(ECSOrganizer &ecs,Shader *textShader){
-
+void loadPausedScene(ECSOrganizer &ecs,Shader *textShader, Shader *backgroundShader){
+    createOverlay(ecs,backgroundShader);
     Entity e = ecs.createEntity();
     ecs.addComponent<MenuOption>(e, MenuOption{
         .index = 0,
@@ -201,7 +200,7 @@ void loadPausedScene(ECSOrganizer &ecs,Shader *textShader){
     ecs.addComponent<Text>(e,Text{
         .content = "Continue",
         .color = MENU_SELECTED_TEXT_COLOR,
-        .scale = 1.0f,
+        .scale = 1.2f,
         .centered = true,
     });
     ecs.addComponent<Position>(e, Position{ 
@@ -256,6 +255,75 @@ void loadPausedScene(ECSOrganizer &ecs,Shader *textShader){
         .position = glm::vec2{WINDOW_WIDTH/2.0f,WINDOW_HEIGHT/6.0f}
     });
     ecs.addComponent<PauseMenu>(e,PauseMenu{});
+}
+
+void loadPausedSettingsScene(ECSOrganizer &ecs,Shader *textShader, Shader *squareShader, Shader *backgroundShader){
+    createOverlay(ecs,backgroundShader);
+
+    Entity e = ecs.createEntity();
+    ecs.addComponent<MenuOption>(e, MenuOption{
+        .index = 0,
+        .isSelected = true
+    });
+    ecs.addComponent<Text>(e,Text{
+        .content = "Music Volume",
+        .color = MENU_SELECTED_TEXT_COLOR,
+        .scale = 1.0f,
+        .rightAligned = true,
+    });
+    ecs.addComponent<Position>(e, Position{ 
+        .position = glm::vec2{2.0f*WINDOW_WIDTH/5.0f, 3.0f*WINDOW_HEIGHT/5.0f}
+    });
+    
+
+    e = ecs.createEntity();
+    ecs.addComponent<MenuOption>(e, MenuOption{
+        .index = 1,
+        .isSelected = true
+    });
+    ecs.addComponent<Text>(e,Text{
+        .content = "SFX Volume",
+        .color = MENU_TEXT_COLOR,
+        .scale = 1.0f,
+        .rightAligned = true,
+    });
+    ecs.addComponent<Position>(e, Position{ 
+        .position = glm::vec2{2.0f*WINDOW_WIDTH/5.0f, 2.0f*WINDOW_HEIGHT/5.0f}
+    });
+
+    e = ecs.createEntity();
+    ecs.addComponent<MenuOption>(e, MenuOption{
+        .index = 2,
+        .isSelected = true
+    });
+    ecs.addComponent<Text>(e,Text{
+        .content = "Back",
+        .color = MENU_TEXT_COLOR,
+        .scale = 1.0f,
+        .centered = true
+    });
+    ecs.addComponent<Position>(e, Position{ 
+        .position = glm::vec2{WINDOW_WIDTH/2.0f, 1.0f*WINDOW_HEIGHT/5.0f}
+    });
+
+    glm::vec2 startMusicBar = {WINDOW_WIDTH/2.0f, 3.0f*WINDOW_HEIGHT/5.0f};    
+    glm::vec2 startSfxBar = {WINDOW_WIDTH/2.0f, 2.0f*WINDOW_HEIGHT/5.0f};    
+
+
+
+    for(int i = 0; i < 10; i++){
+        glm::vec2 pos = startMusicBar + glm::vec2(i*(SQUARE_SIDE+ SQUARE_GAP), SQUARE_SIDE + SQUARE_GAP); 
+        createSquareVol(ecs, squareShader, pos, BarType::Music, i/10.0f // incremental size
+        );
+
+        pos = startSfxBar + glm::vec2(i*(SQUARE_SIDE+ SQUARE_GAP), SQUARE_SIDE + SQUARE_GAP); 
+        createSquareVol(ecs, squareShader, pos, BarType::Sfx,
+        i/10.0f // incremental size
+        );
+    }
+
+
+
 }
 
 void loadWinningScene(ECSOrganizer &ecs,Shader *textShader, Shader *backgroundShader){

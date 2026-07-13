@@ -97,6 +97,17 @@ class MeshGenSystem: public System{
             indices = {0, 1, 2, 0, 2, 3};
         
         }
+        else if(sig.test(ecs_org.getComponentType<Overlay>())){
+            Overlay ov = ecs_org.getComponent<Overlay>(entity);
+            vertices = {
+                glm::vec3{-ov.width/2.f,  -ov.height/2.f, 0.f},
+                glm::vec3{ ov.width/2.f,  -ov.height/2.f, 0.f},
+                glm::vec3{ ov.width/2.f,   ov.height/2.f, 0.f},
+                glm::vec3{-ov.width/2.f,   ov.height/2.f, 0.f},
+            };
+            indices = {0, 1, 2, 0, 2, 3};
+        
+        }
 
         glGenVertexArrays(1,&VAO);
         glGenBuffers(1,&VBO);
@@ -133,6 +144,9 @@ class RenderSystem: public System{
         void init(GLuint width, GLuint height){
             glClearColor(0.f,0.f,0.f,1.0f);
             mProjection = glm::ortho(0.0f,(float)width,0.0f,(float)height,-1.0f,1.0f);
+            // blend for overlays
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         }
 
         void update(){

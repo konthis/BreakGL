@@ -60,7 +60,9 @@ void loadMainMenuScene(ECSOrganizer& ecs, Shader *textShader, Shader *background
 
 void loadGameOverScene(ECSOrganizer &ecs,Shader *textShader, Shader *backgroundShader);
 
-void loadPausedScene(ECSOrganizer &ecs,Shader *textShader);
+void loadPausedScene(ECSOrganizer &ecs,Shader *textShader, Shader *backgroundShader);
+
+void loadPausedSettingsScene(ECSOrganizer &ecs,Shader *textShader, Shader *squareShader, Shader *backgroundShader);
 
 void loadWinningScene(ECSOrganizer &ecs,Shader *textShader, Shader *backgroundShader);
 

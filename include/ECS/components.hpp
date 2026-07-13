@@ -226,3 +226,8 @@ struct Background{
     float width;
     float height;
 };
+
+struct Overlay{
+    float width;
+    float height;
+};

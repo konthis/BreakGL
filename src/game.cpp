@@ -3,6 +3,7 @@
 ECSOrganizer ecs_org;
 
 void Game::init(){
+
     mWindow.init(WINDOW_WIDTH, WINDOW_HEIGHT, "BreakGL");
     // mWindow.init(mWidth, mHeight, "BreakGL");
     mSquareShader = std::make_unique<Shader>(SHADER_DIR "/square/square.vert", SHADER_DIR "/square/square.frag");
@@ -23,6 +24,7 @@ void Game::init(){
     ecs_org.createComponent<VolBar>();
     ecs_org.createComponent<Square>();
     ecs_org.createComponent<Preview>();
+    ecs_org.createComponent<Overlay>();
     ecs_org.createComponent<Platform>();
     ecs_org.createComponent<Position>();
     ecs_org.createComponent<Collider>();
@@ -117,6 +119,10 @@ void Game::run(){
         GLuint keyPressed = mWindow.processKeyPress(mState);
         switch(mState){
             case GameState::Playing:{
+                if(keyPressed==GLFW_KEY_ESCAPE){
+                    setGameState(GameState::Paused);
+                    break;
+                }
                 currTime = (float)glfwGetTime();
                 frameDt = currTime - mLastTime;
                 mTimeAccumulator += frameDt;
@@ -213,9 +219,6 @@ void Game::run(){
                 mRenderSystem->update();
                 mTextRenderSystem->update();
 
-                if(keyPressed==GLFW_KEY_ESCAPE){
-                    setGameState(GameState::Paused);
-                }
                 break;
             }
 
@@ -293,18 +296,27 @@ void Game::run(){
 
             case GameState::Paused:{
                 int confirmed = mMenuInputSystem->update(keyPressed,mDT/2.0f, MenuType::Vertical);
-                mTextRenderSystem->update();
                 if (confirmed == 0){
                     // just continue, but still reset the times
                     mLastTime = (float)glfwGetTime();
                     mTimeAccumulator = 0.0f;
                     for(auto &e : ecs_org.getEntitiesOfComponent<PauseMenu>()){
                         ecs_org.destroyEntity(e);
+                    }                    
+                    for(auto &e : ecs_org.getEntitiesOfComponent<Overlay>()){
+                        ecs_org.destroyEntity(e);
                     }
                     mState = GameState::Playing;
                 }
-                else if (confirmed == 1){
-                    setGameState(GameState::MainMenu);
+                else if (confirmed == 1){            
+                    for(auto &e : ecs_org.getEntitiesOfComponent<PauseMenu>()){
+                        ecs_org.destroyEntity(e);
+                    }                    
+                    for(auto &e : ecs_org.getEntitiesOfComponent<Overlay>()){
+                        ecs_org.destroyEntity(e);
+                    }
+                    setGameState(GameState::PausedSettings);
+
                 }
                 else if (confirmed == 2){
                     setGameState(GameState::MainMenu);
@@ -312,6 +324,65 @@ void Game::run(){
                 else if (confirmed == 3){
                     mWindow.close();
                 }
+                mRenderSystem->update();  
+                mTextRenderSystem->update();
+                break;
+            }
+
+            case GameState::PausedSettings:{
+                int action = mMenuInputSystem->update(keyPressed,mDT/3.0f, MenuType::SelectAndBar);
+                // enter+main menu
+                if(action == 2){
+                    if(mMenuInputSystem->getSelectedIdx() == 2){
+                        for(auto &e : ecs_org.getEntitiesOfComponent<MenuOption>()){
+                            ecs_org.destroyEntity(e);
+                        }
+                        for(auto &e : ecs_org.getEntitiesOfComponent<VolBar>()){
+                            ecs_org.destroyEntity(e);
+                        }
+                        for(auto &e : ecs_org.getEntitiesOfComponent<Overlay>()){
+                            ecs_org.destroyEntity(e);
+                        }
+                        setGameState(GameState::Paused);
+                    }
+                }
+
+                if(action == 1 || action == -1){
+                    GLuint selected = mMenuInputSystem->getSelectedIdx();
+                    float& vol = selected == 0 ? mMusicVol : mSfxVol;
+                    // level because of inconsistencies
+                    int level = (int)roundf(vol * 10.0f);
+                    level = glm::clamp(level + action, 0, 10);
+                    vol = level / 10.0f;
+                    if(selected==1){
+                        mAudioManager.playSFX(SFX_TEST_ID);
+                    }
+                    mAudioManager.setVolumes(mMusicVol,mSfxVol);
+                }
+
+
+                for(auto e : ecs_org.getEntitiesOfComponent<VolBar>()){
+                    auto& vb = ecs_org.getComponent<VolBar>(e);
+                    auto& rend = ecs_org.getComponent<Renderable>(e);
+                    float vol = vb.type == BarType::Music ? mMusicVol : mSfxVol;
+                    rend.hidden = (vb.size >= vol);
+                }
+
+                if(keyPressed==GLFW_KEY_ESCAPE){
+                    for(auto &e : ecs_org.getEntitiesOfComponent<MenuOption>()){
+                        ecs_org.destroyEntity(e);
+                    }
+                    for(auto &e : ecs_org.getEntitiesOfComponent<VolBar>()){
+                        ecs_org.destroyEntity(e);
+                    }
+                    for(auto &e : ecs_org.getEntitiesOfComponent<Overlay>()){
+                        ecs_org.destroyEntity(e);
+                    }
+                    setGameState(GameState::Paused);
+                }
+
+                mRenderSystem->update();  
+                mTextRenderSystem->update();
                 break;
             }
 
@@ -457,9 +528,17 @@ void Game::setGameState(GameState newState) {
             mMeshGenSystem->init();
             break;
         }
+        case GameState::PausedSettings:{
+            mMenuInputSystem->reset();
+            loadPausedSettingsScene(ecs_org,mTextShader.get(),mSquareShader.get(),mBackgroundShader.get());
+            mMeshGenSystem->init();
+            break;
+        }
         case GameState::Paused:{
             mMenuInputSystem->reset();
-            loadPausedScene(ecs_org, mTextShader.get());
+            loadPausedScene(ecs_org, mTextShader.get(), mBackgroundShader.get());
+            for(auto e : ecs_org.getEntitiesOfComponent<Overlay>())
+                mMeshGenSystem->initEntity(e);
             break;
         }
         case GameState::Settings:{

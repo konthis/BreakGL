@@ -191,7 +191,7 @@ void loadGameOverScene(ECSOrganizer &ecs,Shader *textShader, Shader *backgroundS
 }
 
 void loadPausedScene(ECSOrganizer &ecs,Shader *textShader, Shader *backgroundShader){
-    createOverlay(ecs,backgroundShader);
+    createOverlay(ecs,backgroundShader, glm::vec2{WINDOW_WIDTH/2.0, WINDOW_HEIGHT/2.3}, glm::vec2{WINDOW_WIDTH/2.0,WINDOW_HEIGHT/1.4},true);
     Entity e = ecs.createEntity();
     ecs.addComponent<MenuOption>(e, MenuOption{
         .index = 0,
@@ -216,7 +216,7 @@ void loadPausedScene(ECSOrganizer &ecs,Shader *textShader, Shader *backgroundSha
     ecs.addComponent<Text>(e,Text{
         .content = "Settings",
         .color = MENU_TEXT_COLOR,
-        .scale = 1.0f,
+        .scale = 1.2f,
         .centered = true,
     });
     ecs.addComponent<Position>(e, Position{ 
@@ -232,7 +232,7 @@ void loadPausedScene(ECSOrganizer &ecs,Shader *textShader, Shader *backgroundSha
     ecs.addComponent<Text>(e,Text{
         .content = "Main Menu",
         .color = MENU_TEXT_COLOR,
-        .scale = 1.0f,
+        .scale = 1.2f,
         .centered = true,
     });
     ecs.addComponent<Position>(e, Position{ 
@@ -248,7 +248,7 @@ void loadPausedScene(ECSOrganizer &ecs,Shader *textShader, Shader *backgroundSha
     ecs.addComponent<Text>(e,Text{
         .content = "Quit",
         .color = MENU_TEXT_COLOR,
-        .scale = 1.0f,
+        .scale = 1.2f,
         .centered = true,
     });
     ecs.addComponent<Position>(e, Position{ 
@@ -258,7 +258,7 @@ void loadPausedScene(ECSOrganizer &ecs,Shader *textShader, Shader *backgroundSha
 }
 
 void loadPausedSettingsScene(ECSOrganizer &ecs,Shader *textShader, Shader *squareShader, Shader *backgroundShader){
-    createOverlay(ecs,backgroundShader);
+    createOverlay(ecs,backgroundShader, glm::vec2{WINDOW_WIDTH/2,WINDOW_HEIGHT/2.2}, glm::vec2{WINDOW_WIDTH/1.1,WINDOW_HEIGHT/1.8},true);
 
     Entity e = ecs.createEntity();
     ecs.addComponent<MenuOption>(e, MenuOption{
@@ -275,7 +275,6 @@ void loadPausedSettingsScene(ECSOrganizer &ecs,Shader *textShader, Shader *squar
         .position = glm::vec2{2.0f*WINDOW_WIDTH/5.0f, 3.0f*WINDOW_HEIGHT/5.0f}
     });
     
-
     e = ecs.createEntity();
     ecs.addComponent<MenuOption>(e, MenuOption{
         .index = 1,

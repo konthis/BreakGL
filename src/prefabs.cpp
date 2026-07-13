@@ -203,18 +203,26 @@ Entity createBackground(ECSOrganizer &ecs, Shader *backgroundShader, BackgroundT
     return e;
 }
 
-Entity createOverlay(ECSOrganizer &ecs, Shader *backgroundShader){
+Entity createOverlay(ECSOrganizer &ecs, Shader *backgroundShader, glm::vec2 pos, glm::vec2 size, bool alphaOverlay){
     Entity e = ecs.createEntity();
     ecs.addComponent<Position>(e, Position{ 
-        .position = {WINDOW_WIDTH/2.0f,WINDOW_HEIGHT/2.0f}
+        .position = pos
     });    
     
-    ecs.addComponent<Renderable>(e, Renderable{ backgroundShader, 
-        .color = OVERLAY_ALPHA_MASK_MID, 
-    });
+    if(alphaOverlay){
+        ecs.addComponent<Renderable>(e, Renderable{ backgroundShader, 
+            .color = OVERLAY_ALPHA_MASK_MID, 
+        });
+    }
+    else{
+        ecs.addComponent<Renderable>(e, Renderable{ backgroundShader, 
+            .color = OVERLAY_BLACK
+        });
+
+    }
     ecs.addComponent<Overlay>(e,Overlay{
-        .width = WINDOW_WIDTH,
-        .height = WINDOW_HEIGHT
+        .width = size.x,
+        .height = size.y 
     });
     return e;
 }

@@ -17,4 +17,4 @@ Entity createSquareVol(ECSOrganizer& ecs, Shader* squareShader, glm::vec2 pos, B
 
 Entity createBackground(ECSOrganizer &ecs, Shader *backgroundShader, BackgroundType bType);
 
-Entity createOverlay(ECSOrganizer &ecs, Shader *backgroundShader);
+Entity createOverlay(ECSOrganizer &ecs, Shader *backgroundShader, glm::vec2 pos, glm::vec2 size, bool alphaOverlay);

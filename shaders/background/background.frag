@@ -12,6 +12,6 @@ out vec4 FragColor;
 
 void main()
 {
-    float line = mod(gl_FragCoord.y, 4.0) < 2.0 ? 0.35 : 1.0; 
+    float line = mod(gl_FragCoord.y, 4.0) < 2.0 ? 0.85 : 1.0; 
     FragColor = u_color*line;
 }

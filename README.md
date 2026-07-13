@@ -12,4 +12,4 @@ Rendering is done with raw OpenGL. Shaders are loaded and compiled at runtime.
 
 OpenGL 3.3, GLFW, GLAD, GLM, FreeType
 
-![gameplay](recordings/recordV1.gif)
+![gameplay](recordings/gameplayV2.gif)

@@ -51,6 +51,7 @@ int Window::init(GLuint width, GLuint height, const char* title){
     }
 
     glfwMakeContextCurrent(mWindow);
+
     // NO RESIZING (YET)
     // glfwSetFramebufferSizeCallback(mWindow, framebuffer_size_callback);
 

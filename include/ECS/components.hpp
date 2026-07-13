@@ -4,6 +4,7 @@
 #include "shader.hpp"
 #include <unordered_map>
 #include <memory>
+#include <ranges>
 #include <set>
 #define GLM_ENABLE_EXPERIMENTAL // enables the to_string
 #include <glm/vec2.hpp>
@@ -36,6 +37,7 @@ class ComponentArray: public IComponentArray{
         std::array<T,MAX_ENTITIES> mComponentArray{};
         std::unordered_map<Entity,size_t> mEntityToIndexMap;
         std::unordered_map<size_t,Entity> mIndexToEntityMap;
+
         size_t mSize{};
     public:
         ComponentArray()    = default;
@@ -69,6 +71,11 @@ class ComponentArray: public IComponentArray{
             assert(mEntityToIndexMap.find(entity)!=mEntityToIndexMap.end() && "Entity's component doesn't exist");
             return mComponentArray[mEntityToIndexMap[entity]];
         }
+
+        auto getEntities() const { return std::views::keys(mEntityToIndexMap); }
+
+
+
 };
 
 
@@ -115,6 +122,11 @@ class ComponentManager{
     template<typename T>
     T &getComponent(const Entity &entity){
         return getComponentArray<T>()->getComponent(entity);
+    }
+
+    template<typename T>
+    auto getEntitiesOfComponent(){
+        return getComponentArray<T>()->getEntities();
     }
 
     void entityDestroyed(Entity entity)

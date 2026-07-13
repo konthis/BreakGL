@@ -531,7 +531,11 @@ void Game::setGameState(GameState newState) {
         case GameState::PausedSettings:{
             mMenuInputSystem->reset();
             loadPausedSettingsScene(ecs_org,mTextShader.get(),mSquareShader.get(),mBackgroundShader.get());
-            mMeshGenSystem->init();
+            // mMeshGenSystem->init();
+            for(auto e : ecs_org.getEntitiesOfComponent<Overlay>())
+                mMeshGenSystem->initEntity(e);
+            for(auto e : ecs_org.getEntitiesOfComponent<VolBar>())
+                mMeshGenSystem->initEntity(e);
             break;
         }
         case GameState::Paused:{

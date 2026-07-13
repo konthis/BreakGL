@@ -71,19 +71,22 @@ Entity createSquare(ECSOrganizer& ecs, Shader* squareShader, glm::vec2 pos, Powe
         .power = power
     });
     if(power == PowerUp::SUMMON_BALL){
-        ecs.addComponent<Renderable>(e, Renderable{ squareShader, 
+        ecs.addComponent<Renderable>(e, Renderable{ 
+            .shader = squareShader, 
             .color = SQUARE_COLOR_YELLOW 
         });
 
     }
     else if(power == PowerUp::LONGER_PLATFORM){
-        ecs.addComponent<Renderable>(e, Renderable{ squareShader, 
+        ecs.addComponent<Renderable>(e, Renderable{ 
+            .shader = squareShader, 
             .color = SQUARE_COLOR_GREEN 
         });
 
     }
     else{
-        ecs.addComponent<Renderable>(e, Renderable{ squareShader, 
+        ecs.addComponent<Renderable>(e, Renderable{ 
+            .shader = squareShader, 
             .color = SQUARE_COLOR_RED 
         });
     }
@@ -105,21 +108,24 @@ Entity createSquareHollow(ECSOrganizer& ecs, Shader* squareShader, glm::vec2 pos
     });
 
     if(power == PowerUp::SUMMON_BALL){
-        ecs.addComponent<Renderable>(e, Renderable{ squareShader, 
+        ecs.addComponent<Renderable>(e, Renderable{ 
+            .shader = squareShader, 
             .color = SQUARE_COLOR_YELLOW,
             .hidden = true 
         });
 
     }
     else if(power == PowerUp::LONGER_PLATFORM){
-        ecs.addComponent<Renderable>(e, Renderable{ squareShader, 
+        ecs.addComponent<Renderable>(e, Renderable{ 
+            .shader = squareShader, 
             .color = SQUARE_COLOR_GREEN,
             .hidden = true 
         });
 
     }
     else{
-        ecs.addComponent<Renderable>(e, Renderable{ squareShader, 
+        ecs.addComponent<Renderable>(e, Renderable{ 
+            .shader = squareShader, 
             .color = SQUARE_COLOR_RED, 
             .hidden = true 
         });
@@ -138,7 +144,8 @@ Entity createSquareVol(ECSOrganizer& ecs, Shader* squareShader, glm::vec2 pos, B
         .side = SQUARE_SIDE,
     });
 
-    ecs.addComponent<Renderable>(e, Renderable{ squareShader, 
+    ecs.addComponent<Renderable>(e, Renderable{ 
+        .shader = squareShader, 
         .color = SQUARE_COLOR_GREEN, 
         .hidden = true 
     });
@@ -158,39 +165,45 @@ Entity createBackground(ECSOrganizer &ecs, Shader *backgroundShader, BackgroundT
     
     switch(bType){
         case BackgroundType::SCENE_1:{
-            ecs.addComponent<Renderable>(e, Renderable{ backgroundShader, 
+            ecs.addComponent<Renderable>(e, Renderable{ 
+                .shader = backgroundShader, 
                 .color = BACKGROUND_DARK_PURPLE, 
             });
             break;
         }
         case BackgroundType::SCENE_2:{
-            ecs.addComponent<Renderable>(e, Renderable{ backgroundShader, 
+            ecs.addComponent<Renderable>(e, Renderable{ 
+                .shader = backgroundShader, 
                 .color = BACKGROUND_CHARCOAL, 
             });
             break;
         }
         case BackgroundType::SCENE_3:{
-            ecs.addComponent<Renderable>(e, Renderable{ backgroundShader, 
+            ecs.addComponent<Renderable>(e, Renderable{ 
+                .shader = backgroundShader, 
                 .color = BACKGROUND_DARK_TEAL, 
             });
             break;
         }        
         case BackgroundType::MAIN_MENU:{
-            ecs.addComponent<Renderable>(e, Renderable{ backgroundShader, 
+            ecs.addComponent<Renderable>(e, Renderable{ 
+                .shader =backgroundShader, 
                 .color = BACKGROUND_DARK_NAVY, 
             });
 
             break;
         }
         case BackgroundType::WIN:{
-            ecs.addComponent<Renderable>(e, Renderable{ backgroundShader, 
+            ecs.addComponent<Renderable>(e, Renderable{ 
+                .shader = backgroundShader, 
                 .color = BACKGROUND_GRAY, 
             });
 
             break;
         }
         case BackgroundType::LOSE:{
-            ecs.addComponent<Renderable>(e, Renderable{ backgroundShader, 
+            ecs.addComponent<Renderable>(e, Renderable{ 
+                .shader = backgroundShader, 
                 .color = BACKGROUND_GRAY, 
             });
             break;
@@ -210,12 +223,14 @@ Entity createOverlay(ECSOrganizer &ecs, Shader *backgroundShader, glm::vec2 pos,
     });    
     
     if(alphaOverlay){
-        ecs.addComponent<Renderable>(e, Renderable{ backgroundShader, 
+        ecs.addComponent<Renderable>(e, Renderable{ 
+            .shader =backgroundShader, 
             .color = OVERLAY_ALPHA_MASK_MID, 
         });
     }
     else{
-        ecs.addComponent<Renderable>(e, Renderable{ backgroundShader, 
+        ecs.addComponent<Renderable>(e, Renderable{ 
+            .shader = backgroundShader, 
             .color = OVERLAY_BLACK
         });
 

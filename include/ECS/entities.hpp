@@ -4,6 +4,7 @@
 #include <queue>
 #include <array>
 #include <bitset>
+#include <cstdint>
 
 using Entity                = uint32_t;
 const Entity MAX_ENTITIES   = 5000;

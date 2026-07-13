@@ -151,6 +151,27 @@ class RenderSystem: public System{
 
         void update(){
             glClear(GL_COLOR_BUFFER_BIT);
+            // have to draw background 1st
+            for(auto const& entity : mEntities){
+                if(!ecs_org.getSignature(entity).test(ecs_org.getComponentType<Background>())) continue;
+                auto& rend = ecs_org.getComponent<Renderable>(entity);             
+                auto& pos = ecs_org.getComponent<Position>(entity);
+                rend.modelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(pos.position, 0.0f));
+
+                rend.shader->activate();
+
+                rend.shader->setUniform<glm::mat4>("u_model",rend.modelMatrix);
+                rend.shader->setUniform<glm::vec2>("u_resolution",glm::vec2(WINDOW_WIDTH,WINDOW_HEIGHT));
+
+                rend.shader->setUniform<glm::mat4>("u_projection",mProjection);
+                rend.shader->setUniform<glm::vec4>("u_color",rend.color);
+                rend.shader->setUniform<float>("u_time",(float)glfwGetTime());
+
+                glBindVertexArray(rend.VAO);
+                glDrawElements(GL_TRIANGLES, rend.indexCount, GL_UNSIGNED_INT, 0);
+                glBindVertexArray(0);
+
+            }
 
             for (auto const& entity : mEntities){
 
